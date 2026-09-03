@@ -153,6 +153,7 @@ export function Dashboard() {
       await activeTemplateHtml.setValue(sanitized)
     }
     
+    setActiveTab('custom')
     setEditingTemplate(null)
     showStatus('Changes saved.', true)
   }
@@ -327,7 +328,7 @@ export function Dashboard() {
           <div className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="grow overflow-hidden rounded-lg border border-border bg-card">
               <Suspense fallback={<div className="p-4 text-xs text-muted-foreground">Loading editor...</div>}>
-                <Editor value={editorValue} onChange={setEditorValue} />
+                <Editor value={editorValue} onChange={setEditorValue} darkMode={dark} />
               </Suspense>
             </div>
           </div>
@@ -352,7 +353,7 @@ export function Dashboard() {
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-sm font-bold tracking-tight">WYNTab</span>
-              <span className="text-[11px] text-muted-foreground font-mono">v{manifestVersion}</span>
+              <span className="text-xs text-muted-foreground font-mono">v{manifestVersion}</span>
             </div>
           </div>
 
@@ -569,7 +570,7 @@ export function Dashboard() {
                   <button 
                     type="button"
                     onClick={handleExport}
-                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
                   >
                     <Download size={14} />
                     Export Backup
@@ -577,7 +578,7 @@ export function Dashboard() {
                   <button 
                     type="button"
                     onClick={() => backupRef.current?.click()}
-                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
                   >
                     <FileUp size={14} />
                     Import JSON

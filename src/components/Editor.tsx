@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
 import { html } from '@codemirror/lang-html'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Compartment } from '@codemirror/state'
 
 export interface EditorProps {
   value: string
@@ -13,6 +13,7 @@ export interface EditorProps {
 export function Editor({ value, onChange, darkMode }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
+  const themeCompartment = useRef(new Compartment())
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -22,7 +23,7 @@ export function Editor({ value, onChange, darkMode }: EditorProps) {
       extensions: [
         basicSetup,
         html(),
-        ...(darkMode ? [oneDark] : []),
+        themeCompartment.current.of(darkMode ? oneDark : []),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString())
@@ -47,6 +48,13 @@ export function Editor({ value, onChange, darkMode }: EditorProps) {
     }
   }, [])
 
+  // Reactively reconfigure theme when darkMode toggles
+  useEffect(() => {
+    if (!viewRef.current) return
+    viewRef.current.dispatch({
+      effects: themeCompartment.current.reconfigure(darkMode ? oneDark : []),
+    })
+  }, [darkMode])
 
   return (
     <div 
@@ -57,4 +65,3 @@ export function Editor({ value, onChange, darkMode }: EditorProps) {
 }
 
 export default Editor
-

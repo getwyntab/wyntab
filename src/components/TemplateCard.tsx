@@ -87,7 +87,7 @@ export function TemplateCard({
       >
         <Preview html={template.html} />
         {/* Subtle hover badge */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity bg-background/90 backdrop-blur-xs text-foreground text-[11px] font-medium px-2 py-0.5 rounded-md border border-border shadow-xs pointer-events-none">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity bg-background/90 backdrop-blur-xs text-foreground text-xs font-medium px-2 py-0.5 rounded-md border border-border shadow-xs pointer-events-none">
           Click to Preview
         </div>
       </div>
@@ -138,7 +138,10 @@ export function TemplateCard({
                 {!template.isBuiltin && onRename && (
                   <button
                     type="button"
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => {
+                      setEditName(template.name)
+                      setIsEditing(true)
+                    }}
                     className="p-1 text-muted-foreground hover:text-foreground rounded transition-colors shrink-0"
                     title="Rename template"
                     aria-label="Rename"

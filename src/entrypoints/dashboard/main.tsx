@@ -442,7 +442,7 @@ export function Dashboard() {
 
         {/* Built-in Gallery Stream */}
         {activeTab === 'built-in' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {builtins.map((t) => (
               <TemplateCard
                 key={t.id}
@@ -462,7 +462,7 @@ export function Dashboard() {
         {/* Custom Library Stream */}
         {activeTab === 'custom' && (
           userList.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {userList.map((t) => (
                 <TemplateCard
                   key={t.id}
@@ -481,7 +481,7 @@ export function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center gap-3">
+            <div className="max-w-md mx-auto w-full rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center gap-3 my-6">
               <div className="h-10 w-10 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground">
                 <Code2 size={20} />
               </div>
@@ -515,7 +515,7 @@ export function Dashboard() {
 
         {/* Settings Stream */}
         {activeTab === 'settings' && (
-          <div className="space-y-6">
+          <div className="max-w-xl space-y-6">
             {/* System Information */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">System Information</h3>
@@ -589,8 +589,8 @@ export function Dashboard() {
 
       {/* Large Preview Modal */}
       {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-background/80 backdrop-blur-xs">
-          <div className="w-full max-w-4xl h-[80vh] bg-card border border-border rounded-xl flex flex-col overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-background/80 backdrop-blur-xs">
+          <div className="w-full max-w-3xl h-[75vh] max-h-[580px] bg-card border border-border rounded-2xl flex flex-col overflow-hidden shadow-2xl">
             <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-2">
                 <Eye size={16} className="text-muted-foreground" />

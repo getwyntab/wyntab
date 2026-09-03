@@ -5,31 +5,25 @@ import { type Template } from '@/lib/templates'
 
 // ─── Thumbnail Preview ─────────────────────────────────────────────────────────
 function Preview({ html }: { html?: string }) {
-  const [blobUrl, setBlobUrl] = useState('')
+  if (!html) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-muted-foreground text-xs font-medium">
+        No Preview
+      </div>
+    )
+  }
 
-  useEffect(() => {
-    if (!html) return
-    const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; }</style>` + html
-    const blob = new Blob([styledHtml], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    setBlobUrl(url)
-    return () => URL.revokeObjectURL(url)
-  }, [html])
+  const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${html}`
 
   return (
     <div className="relative aspect-video w-full overflow-hidden bg-muted/40 border-b border-border">
-      {blobUrl ? (
-        <iframe
-          src={blobUrl}
-          scrolling="no"
-          className="absolute inset-0 h-[400%] w-[400%] origin-top-left scale-25 pointer-events-none border-none select-none"
-          title="Preview"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center text-muted-foreground text-xs font-medium">
-          No Preview
-        </div>
-      )}
+      <iframe
+        srcDoc={styledHtml}
+        scrolling="no"
+        className="absolute inset-0 h-[400%] w-[400%] origin-top-left scale-25 pointer-events-none border-none select-none"
+        title="Preview"
+        sandbox="allow-scripts allow-same-origin allow-forms"
+      />
     </div>
   )
 }
@@ -122,7 +116,7 @@ export function TemplateCard({
                 <button
                   type="button"
                   onClick={handleRename}
-                  className="p-1 text-green-600 hover:text-green-700 transition-colors"
+                  className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
                   title="Save name"
                 >
                   <Check size={14} />

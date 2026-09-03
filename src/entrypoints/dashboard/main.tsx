@@ -299,6 +299,15 @@ export function Dashboard() {
           <div className="flex items-center gap-2 shrink-0">
             <button 
               type="button"
+              onClick={() => setDark(!dark)} 
+              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Toggle theme"
+              aria-label="Toggle theme"
+            >
+              {dark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+            <button 
+              type="button"
               onClick={() => setEditingTemplate(null)}
               className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted"
             >
@@ -354,29 +363,29 @@ export function Dashboard() {
               data-testid="tab-built-in"
               onClick={() => setActiveTab('built-in')}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
                 activeTab === 'built-in' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              Built-in Gallery
+              Built-in
             </button>
             <button 
               type="button"
               data-testid="tab-custom"
               onClick={() => setActiveTab('custom')}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
                 activeTab === 'custom' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              Custom Library
+              Custom
             </button>
             <button 
               type="button"
               data-testid="tab-settings"
               onClick={() => setActiveTab('settings')}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
                 activeTab === 'settings' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -416,7 +425,7 @@ export function Dashboard() {
             </p>
           </div>
 
-          {activeTab === 'custom' && (
+          {activeTab === 'custom' && userList.length > 0 && (
             <div className="flex items-center gap-2 shrink-0">
               <button 
                 type="button"
@@ -426,16 +435,14 @@ export function Dashboard() {
                 <Plus size={14} />
                 Upload HTML
               </button>
-              {userList.length > 0 && (
-                <button 
-                  type="button"
-                  onClick={handleExport}
-                  className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
-                >
-                  <Download size={14} />
-                  Export
-                </button>
-              )}
+              <button 
+                type="button"
+                onClick={handleExport}
+                className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+              >
+                <Download size={14} />
+                Export
+              </button>
             </div>
           )}
         </div>
@@ -614,7 +621,7 @@ export function Dashboard() {
                 </button>
               </div>
             </header>
-            <div className="flex-1 bg-white overflow-hidden">
+            <div className="flex-1 bg-muted/30 overflow-hidden">
               <iframe 
                 srcDoc={`<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${previewTemplate.html}`}
                 scrolling="no"
@@ -634,7 +641,7 @@ export function Dashboard() {
             'rounded-lg border px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-sm whitespace-nowrap flex items-center gap-2', 
             status.ok ? 'border-border bg-card text-foreground' : 'border-destructive/40 bg-destructive/10 text-destructive'
           )}>
-            {status.ok ? <CheckCircle2 size={14} className="text-green-600" /> : <X size={14} />}
+            {status.ok ? <CheckCircle2 size={14} className="text-green-600 dark:text-green-400" /> : <X size={14} />}
             {status.msg}
           </div>
         </div>

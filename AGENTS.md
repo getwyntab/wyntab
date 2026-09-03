@@ -32,16 +32,16 @@ This file sets non-negotiable instructions and project context for any AI agent 
 
 ### Development
 ```bash
-bun dev              # Chrome MV3
-bun dev:firefox      # Firefox MV2
+npm run dev          # Chrome MV3
+npm run dev:firefox  # Firefox MV2
 ```
 
 ### Production Build & Packaging
 ```bash
-bun build            # Build Chrome MV3
-bun build:firefox    # Build Firefox MV2
-bun zip              # Package Chrome zip
-bun zip:firefox      # Package Firefox zip
+npm run build        # Build Chrome MV3
+npm run build:firefox # Build Firefox MV2
+npm run zip          # Package Chrome zip
+npm run zip:firefox  # Package Firefox zip
 ```
 
 ### Testing & Validation
@@ -91,5 +91,5 @@ WYNTab operates across three distinct browser extension environments:
 - **TypeScript**: Strict typing for all interfaces; zero `any` in application code.
 - **React**: Functional components and hooks only.
 - **Safety**: All user-uploaded HTML **must** pass through `sanitizeHtml` in `src/lib/sanitize.ts` before storage.
-- **Lockfile Integrity**: Use `bun add` / `bun remove` when updating dependencies so `bun.lock` stays synchronized with GitHub Actions CI.
+- **Lockfile Integrity**: Use `npm install` / `npm uninstall` when updating dependencies so `package-lock.json` stays synchronized with GitHub Actions CI.
 - **Storage**: Use `activeTemplateId` for selected template ID and `activeTemplateHtml` for instant tab rendering.

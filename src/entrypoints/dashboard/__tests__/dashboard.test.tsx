@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Dashboard } from '../main'
+import { userTemplates } from '@/lib/storage'
 
 describe('Dashboard entrypoint', () => {
   it('renders dashboard navigation and default Built-in gallery', async () => {
@@ -44,5 +45,36 @@ describe('Dashboard entrypoint', () => {
     expect(screen.getByText(/data management/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /export backup/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /import json/i })).toBeInTheDocument()
+  })
+
+  it('sanitizes malicious script and iframe tags when importing backup JSON', async () => {
+    render(<Dashboard />)
+
+    const input = screen.getByTestId('input-backup') as HTMLInputElement
+    const maliciousBackup = JSON.stringify({
+      version: 1,
+      userTemplates: [
+        {
+          id: 'imported-xss',
+          name: 'XSS Template',
+          html: '<h1>Title</h1><script>alert("xss")</script><iframe src="evil.com"></iframe>',
+          isBuiltin: false,
+          uploadedAt: new Date().toISOString(),
+        },
+      ],
+      activeTemplateId: 'imported-xss',
+    })
+
+    const file = new File([maliciousBackup], 'backup.json', { type: 'application/json' })
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(async () => {
+      const saved = await userTemplates.getValue()
+      const imported = saved?.find((t) => t.id === 'imported-xss')
+      expect(imported).toBeDefined()
+      expect(imported?.html).not.toContain('<script>')
+      expect(imported?.html).not.toContain('<iframe>')
+      expect(imported?.html).toContain('<h1>Title</h1>')
+    })
   })
 })

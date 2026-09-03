@@ -14,25 +14,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 22
+          cache: 'npm'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: npm ci
 
       - name: Validate DESIGN.md spec
         run: npm run design:lint
 
       - name: Type check
-        run: bun run compile
+        run: npm run compile
 
       - name: Run unit & UI tests
         run: npm test
 
       - name: Build Chrome MV3
-        run: bun run build
+        run: npm run build
 
       - name: Build Firefox MV2
-        run: bun run build:firefox
+        run: npm run build:firefox

@@ -37,4 +37,4 @@ WYNTab is a browser extension that enables full customization of the New Tab pag
 
 Report bugs or suggest features via the GitHub Issues tracker.
 
-Technical documentation regarding development and architecture is available in GEMINI.md.
+Technical documentation regarding development and architecture is available in AGENTS.md.

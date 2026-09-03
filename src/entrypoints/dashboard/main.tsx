@@ -66,8 +66,9 @@ export function Dashboard() {
         userTemplates.getValue(),
       ])
       setUserList(saved || [])
-      if (!id && builtins.length > 0) {
-        doActivate(builtins[0])
+      const defaultT = builtins[0]
+      if (!id && defaultT) {
+        doActivate(defaultT)
       } else {
         setActiveId(id || '')
       }
@@ -254,10 +255,15 @@ export function Dashboard() {
           throw new Error('Invalid backup format')
         }
 
-        await userTemplates.setValue(data.userTemplates)
+        const sanitizedTemplates = data.userTemplates.map((t) => ({
+          ...t,
+          html: sanitizeHtml(t.html || ''),
+        }))
+
+        await userTemplates.setValue(sanitizedTemplates)
         if (data.activeTemplateId) {
-          const allTemplates = [...builtins, ...data.userTemplates]
-          const active = allTemplates.find(t => t.id === data.activeTemplateId)
+          const allTemplates = [...builtins, ...sanitizedTemplates]
+          const active = allTemplates.find((t) => t.id === data.activeTemplateId)
           if (active) {
             await doActivate(active)
           }
@@ -341,7 +347,7 @@ export function Dashboard() {
   return (
     <div className={cn("min-h-screen bg-background text-foreground font-sans flex flex-col", dark && "dark")}>
       <input type="file" ref={fileRef} className="hidden" accept=".html" onChange={handleFile} />
-      <input type="file" ref={backupRef} className="hidden" accept=".json" onChange={handleImport} />
+      <input type="file" ref={backupRef} data-testid="input-backup" className="hidden" accept=".json" onChange={handleImport} />
 
       {/* Top Masthead */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-xs">

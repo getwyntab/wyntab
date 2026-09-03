@@ -70,8 +70,10 @@ export function TemplateCard({
     <div
       data-testid={`template-card-${template.id}`}
       className={cn(
-        "bg-card border border-border rounded-xl flex flex-col justify-between overflow-hidden transition-all duration-150 shadow-xs",
-        isActive ? "border-primary ring-1 ring-primary/30" : "hover:border-foreground/30"
+        "bg-card border rounded-xl flex flex-col justify-between overflow-hidden transition-colors duration-150 shadow-xs",
+        isActive
+          ? "border-primary ring-1 ring-primary/40"
+          : "border-border hover:border-muted-foreground/50"
       )}
     >
       {/* Clickable Preview Area (Click to preview full screen) */}
@@ -85,12 +87,15 @@ export function TemplateCard({
             onPreview()
           }
         }}
-        className="relative cursor-pointer group"
+        className="relative cursor-pointer group select-none"
         title={`Preview ${template.name} full screen`}
         aria-label={`Preview ${template.name} full screen`}
       >
         <Preview html={template.html} />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+        {/* Subtle hover badge */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity bg-background/90 backdrop-blur-xs text-foreground text-[11px] font-medium px-2 py-0.5 rounded-md border border-border shadow-xs pointer-events-none">
+          Click to Preview
+        </div>
       </div>
 
       {/* Card Info & Primary Trigger */}

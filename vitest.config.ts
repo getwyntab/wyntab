@@ -7,7 +7,7 @@ export default defineConfig({
     environmentOptions: {
       happyDOM: {
         settings: {
-          disableIframePageLoading: true,
+          disableIframePageLoading: false,
           handleDisabledFileLoadingAsSuccess: true,
           navigation: {
             disableChildFrameNavigation: true,
@@ -17,6 +17,8 @@ export default defineConfig({
       },
     },
     globals: true,
+    setupFiles: ['./tests/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
   resolve: {
     alias: {

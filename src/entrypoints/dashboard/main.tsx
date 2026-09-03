@@ -1,11 +1,10 @@
 import { createRoot } from 'react-dom/client'
 import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import {
-  Moon, Sun, Upload,
-  CheckCircle2, Sparkles,
-  Download, FileUp, X,
+  Moon, Sun,
+  CheckCircle2, Download, FileUp, X,
   Code2, Save, ArrowLeft, Plus,
-  Library, Settings, ShieldCheck, Info, Monitor, Eye
+  ShieldCheck, Info, Monitor, Eye
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getBuiltinTemplates, type Template } from '@/lib/templates'
@@ -39,8 +38,8 @@ function useDarkMode() {
   return [dark, setDark] as const
 }
 
-// ─── Dashboard ───────────────────────────────────────────────────────────
-function Dashboard() {
+// ─── Dashboard Component ──────────────────────────────────────────────────────
+export function Dashboard() {
   const [dark, setDark] = useDarkMode()
   const [activeId, setActiveId] = useState('')
   const [userList, setUserList] = useState<Template[]>([])
@@ -61,15 +60,19 @@ function Dashboard() {
   }, [])
 
   async function refreshData() {
-    const [id, saved] = await Promise.all([
-      activeTemplateId.getValue(),
-      userTemplates.getValue(),
-    ])
-    setUserList(saved || [])
-    if (!id && builtins.length > 0) {
-      doActivate(builtins[0])
-    } else {
-      setActiveId(id)
+    try {
+      const [id, saved] = await Promise.all([
+        activeTemplateId.getValue(),
+        userTemplates.getValue(),
+      ])
+      setUserList(saved || [])
+      if (!id && builtins.length > 0) {
+        doActivate(builtins[0])
+      } else {
+        setActiveId(id || '')
+      }
+    } catch {
+      // Fallback for non-extension environments
     }
   }
 
@@ -146,7 +149,6 @@ function Dashboard() {
     await userTemplates.setValue(updated)
     setUserList(updated)
     
-    // If we're editing the active template, update the active HTML too
     if (activeId === editingTemplate.id) {
       await activeTemplateHtml.setValue(sanitized)
     }
@@ -232,7 +234,7 @@ function Dashboard() {
       a.click()
       URL.revokeObjectURL(url)
       showStatus('Backup exported successfully.', true)
-    } catch (err) {
+    } catch {
       showStatus('Failed to export backup.', false)
     }
   }
@@ -263,7 +265,7 @@ function Dashboard() {
         await refreshData()
         setActiveTab('custom')
         showStatus('Backup imported successfully.', true)
-      } catch (err) {
+      } catch {
         showStatus('Failed to import backup. Invalid file.', false)
       }
     }
@@ -271,366 +273,368 @@ function Dashboard() {
     e.target.value = ''
   }
 
+  const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
+    ? browser.runtime.getManifest().version
+    : '0.4.2'
+
   // ─── Editor View ────────────────────────────────────────────────────────────
   if (editingTemplate) {
     return (
-      <div className={cn("h-screen bg-background text-foreground flex flex-col transition-colors duration-300 font-sans", dark && "dark")}>
-        <header className="border-b border-border h-16 flex items-center justify-between px-6 shrink-0 bg-background/50 backdrop-blur-xl z-20">
-          <div className="flex items-center gap-4">
-             <button 
+      <div className={cn("h-screen bg-background text-foreground flex flex-col font-sans", dark && "dark")}>
+        <header className="border-b border-border h-14 flex items-center justify-between px-4 sm:px-6 shrink-0 bg-card">
+          <div className="flex items-center gap-3 min-w-0">
+            <button 
+              type="button"
               onClick={() => setEditingTemplate(null)}
-              className="h-10 w-10 flex items-center justify-center hover:bg-muted rounded-full transition-all border border-border"
+              className="h-8 w-8 flex items-center justify-center hover:bg-muted rounded-lg border border-border"
+              title="Go back"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={16} />
             </button>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary leading-none mb-1">Editor Mode</span>
-              <span className="text-sm font-bold truncate max-w-50">{editingTemplate.name}</span>
+            <div className="truncate">
+              <span className="text-xs text-muted-foreground block leading-none mb-0.5">Editing Template</span>
+              <span className="text-sm font-semibold truncate block">{editingTemplate.name}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl">
-               <ShieldCheck size={14} />
-               <span className="text-[10px] font-bold uppercase tracking-wider">Scripts Disabled (CSP)</span>
-            </div>
+          <div className="flex items-center gap-2 shrink-0">
             <button 
+              type="button"
               onClick={() => setEditingTemplate(null)}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-background h-10 px-5 text-[11px] font-bold uppercase tracking-wider hover:bg-muted transition-all"
+              className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted"
             >
               Discard
             </button>
             <button 
+              type="button"
               onClick={doSaveCode}
-              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground h-10 px-6 text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
+              className="h-8 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5"
             >
-              <Save size={16} className="mr-2" />
-              Save Changes
+              <Save size={14} />
+              Save
             </button>
           </div>
         </header>
         <main className="grow flex overflow-hidden bg-muted/20">
-          <div className="flex-1 flex flex-col p-6 overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
-               <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <Code2 size={14} className="text-primary" /> Source HTML
-               </h2>
-               <div className="text-[10px] font-medium text-muted-foreground/60 italic">Live editing enabled</div>
+          <div className="flex-1 flex flex-col p-4 overflow-hidden">
+            <div className="grow overflow-hidden rounded-lg border border-border bg-card">
+              <Suspense fallback={<div className="p-4 text-xs text-muted-foreground">Loading editor...</div>}>
+                <Editor value={editorValue} onChange={setEditorValue} />
+              </Suspense>
             </div>
-            <div className="grow overflow-hidden rounded-2xl border border-border shadow-inner">
-               <Suspense fallback={
-                 <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
-                   Loading editor...
-                 </div>
-               }>
-                 <Editor value={editingTemplate.html} onChange={setEditorValue} darkMode={dark} />
-               </Suspense>
-            </div>
-          </div>
-          <div className="flex-1 border-l border-border flex flex-col p-6 overflow-hidden">
-             <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-               <Sparkles size={14} className="text-primary" /> Live Preview
-             </h2>
-             <div className="grow bg-white rounded-2xl border border-border overflow-hidden shadow-2xl relative">
-                <iframe 
-                  srcDoc={editorValue} 
-                  className="absolute inset-0 w-full h-full border-none"
-                  title="Live Preview"
-                  sandbox="allow-scripts allow-same-origin allow-forms"
-                />
-             </div>
           </div>
         </main>
       </div>
     )
   }
 
-  // ─── Dashboard View ─────────────────────────────────────────────────────────
+  // ─── Main Dynamic Layout (Blog-Style) ─────────────────────────────────────────
   return (
-    <div className={cn("h-screen bg-background text-foreground transition-colors duration-500 font-sans flex overflow-hidden selection:bg-primary/20", dark && "dark")}>
+    <div className={cn("min-h-screen bg-background text-foreground font-sans flex flex-col", dark && "dark")}>
       <input type="file" ref={fileRef} className="hidden" accept=".html" onChange={handleFile} />
       <input type="file" ref={backupRef} className="hidden" accept=".json" onChange={handleImport} />
 
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-border flex flex-col shrink-0 bg-muted/20 backdrop-blur-xl">
-        <div className="p-6">
-          <div className="flex items-center gap-2.5 mb-10">
-            <div className="bg-primary p-2 rounded-2xl shadow-lg shadow-primary/20">
-              <img src="/icon/128.png" className="w-5 h-5 brightness-0 invert dark:invert-0" alt="WYNTab" />
+      {/* Top Masthead */}
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-xs">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+          {/* Brand */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="bg-primary text-primary-foreground p-1.5 rounded-lg shadow-xs">
+              <img src="/icon/128.png" className="w-4 h-4 brightness-0 invert dark:invert-0" alt="WYNTab" />
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-lg font-black tracking-tighter italic leading-none">WYNTab</span>
-                <span className="text-[10px] font-black text-primary/50 italic leading-none">v{browser.runtime.getManifest().version}</span>
-              </div>
-              <span className="text-[9px] font-black text-muted-foreground/40 leading-none mt-1 uppercase tracking-widest">Dashboard</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm font-bold tracking-tight">WYNTab</span>
+              <span className="text-[11px] text-muted-foreground font-mono">v{manifestVersion}</span>
             </div>
           </div>
 
-          <nav className="space-y-1">
+          {/* Nav Tabs */}
+          <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Views">
             <button 
+              type="button"
+              data-testid="tab-built-in"
               onClick={() => setActiveTab('built-in')}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all",
-                activeTab === 'built-in' ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10" : "text-muted-foreground hover:bg-muted"
+                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                activeTab === 'built-in' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              <Library size={16} />
               Built-in Gallery
             </button>
             <button 
+              type="button"
+              data-testid="tab-custom"
               onClick={() => setActiveTab('custom')}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all",
-                activeTab === 'custom' ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10" : "text-muted-foreground hover:bg-muted"
+                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                activeTab === 'custom' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              <Upload size={16} />
               Custom Library
             </button>
             <button 
+              type="button"
+              data-testid="tab-settings"
               onClick={() => setActiveTab('settings')}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all",
-                activeTab === 'settings' ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10" : "text-muted-foreground hover:bg-muted"
+                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                activeTab === 'settings' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              <Settings size={16} />
               Settings
             </button>
           </nav>
-        </div>
 
-        <div className="mt-auto p-6 space-y-4">
-            <div className="flex items-center justify-between px-2">
-               <button 
-                onClick={() => setDark(!dark)} 
-                className="h-10 w-10 flex items-center justify-center rounded-xl border border-border bg-background transition-all hover:bg-accent hover:border-accent"
-              >
-                {dark ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-              <div className="flex flex-col items-end">
-                 <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Theme</span>
-                 <span className="text-[10px] font-bold">{dark ? 'Dark Mode' : 'Light Mode'}</span>
-              </div>
-            </div>
+          {/* Theme Toggle */}
+          <div className="flex items-center shrink-0">
+            <button 
+              type="button"
+              onClick={() => setDark(!dark)} 
+              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Toggle theme"
+              aria-label="Toggle theme"
+            >
+              {dark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          </div>
         </div>
-      </aside>
+      </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-background">
-        <header className="h-16 flex items-center justify-between px-8 border-b border-border bg-background/50 backdrop-blur-md z-10 shrink-0">
-           <div className="flex items-center gap-3">
-              {activeTab === 'built-in' && <Library size={18} className="text-primary" />}
-              {activeTab === 'custom' && <Upload size={18} className="text-primary" />}
-              {activeTab === 'settings' && <Settings size={18} className="text-primary" />}
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">
-                {activeTab === 'built-in' ? 'Built-in Gallery' : activeTab === 'custom' ? 'Custom Library' : 'System Settings'}
-              </h2>
-           </div>
-           {activeTab === 'custom' && userList.length > 0 && (
+      {/* Main Centered Content Stream */}
+      <main className="max-w-4xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border">
+          <div>
+            <h2 className="text-base font-bold text-foreground">
+              {activeTab === 'built-in' && 'Built-in Gallery'}
+              {activeTab === 'custom' && 'Custom Library'}
+              {activeTab === 'settings' && 'Settings'}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {activeTab === 'built-in' && 'Minimalist, distraction-free templates for your new tab.'}
+              {activeTab === 'custom' && 'Upload HTML files or write custom styles for full control.'}
+              {activeTab === 'settings' && 'Manage extension storage, security notices, and preferences.'}
+            </p>
+          </div>
+
+          {activeTab === 'custom' && (
+            <div className="flex items-center gap-2 shrink-0">
               <button 
-                onClick={handleExport}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-border hover:bg-muted transition-all"
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5"
               >
-                <Download size={14} />
-                Export Backup
+                <Plus size={14} />
+                Upload HTML
               </button>
-           )}
-        </header>
+              {userList.length > 0 && (
+                <button 
+                  type="button"
+                  onClick={handleExport}
+                  className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+                >
+                  <Download size={14} />
+                  Export
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          {activeTab === 'built-in' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {builtins.map((t) => (
+        {/* Built-in Gallery Stream */}
+        {activeTab === 'built-in' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            {builtins.map((t) => (
+              <TemplateCard
+                key={t.id}
+                template={t}
+                isActive={t.id === activeId}
+                onActivate={() => doActivate(t)}
+                onDuplicate={() => doDuplicate(t)}
+                onPreview={() => setPreviewTemplate(t)}
+                onEditCode={() => {
+                  doDuplicate(t).then(() => showStatus('Duplicated for editing.', true))
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Custom Library Stream */}
+        {activeTab === 'custom' && (
+          userList.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {userList.map((t) => (
                 <TemplateCard
                   key={t.id}
                   template={t}
                   isActive={t.id === activeId}
                   onActivate={() => doActivate(t)}
+                  onDelete={() => doDelete(t.id)}
+                  onRename={(name) => doRename(t.id, name)}
                   onDuplicate={() => doDuplicate(t)}
                   onPreview={() => setPreviewTemplate(t)}
                   onEditCode={() => {
-                     doDuplicate(t).then(() => showStatus('Duplicated for editing.', true))
+                    setEditingTemplate(t)
+                    setEditorValue(t.html)
                   }}
                 />
               ))}
             </div>
-          )}
-
-          {activeTab === 'custom' && (
-            userList.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {userList.map((t) => (
-                  <TemplateCard
-                    key={t.id}
-                    template={t}
-                    isActive={t.id === activeId}
-                    onActivate={() => doActivate(t)}
-                    onDelete={() => doDelete(t.id)}
-                    onRename={(name) => doRename(t.id, name)}
-                    onDuplicate={() => doDuplicate(t)}
-                    onPreview={() => setPreviewTemplate(t)}
-                    onEditCode={() => {
-                      setEditingTemplate(t)
-                      setEditorValue(t.html)
-                    }}
-                  />
-                ))}
+          ) : (
+            <div className="rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground">
+                <Code2 size={20} />
               </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center max-w-sm mx-auto animate-in fade-in zoom-in duration-500">
-                <div className="h-20 w-20 bg-muted/50 rounded-3xl border border-border flex items-center justify-center mb-6">
-                  <Upload size={32} className="text-muted-foreground/50" />
-                </div>
-                <h3 className="text-lg font-black uppercase tracking-tighter italic mb-2">Empty Library</h3>
-                <p className="text-xs text-muted-foreground font-medium leading-relaxed mb-8">
-                  Upload or create your first HTML template to start personalizing your experience beyond the built-in gallery.
-                  <br />
-                  <span className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider mt-2 block">Note: Scripts are disabled for security.</span>
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">No Custom Templates Yet</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Upload an HTML file or start with a blank live editor template.
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-4">
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <button 
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="h-8 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5"
+                >
+                  <Plus size={14} />
+                  Upload HTML
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleCreateBlank}
+                  className="h-8 px-3.5 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+                >
+                  <Code2 size={14} />
+                  Create Live
+                </button>
+              </div>
+            </div>
+          )
+        )}
+
+        {/* Settings Stream */}
+        {activeTab === 'settings' && (
+          <div className="space-y-6">
+            {/* System Information */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">System Information</h3>
+              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Info size={14} /> Version
+                  </span>
+                  <span className="font-mono font-medium">{manifestVersion}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Monitor size={14} /> Platform
+                  </span>
+                  <span className="font-mono font-medium">Web Extension</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Security & CSP */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Security</h3>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck size={18} className="text-muted-foreground mt-0.5" />
+                  <div className="text-xs space-y-1">
+                    <h4 className="font-semibold text-foreground">Scripts Disabled (CSP)</h4>
+                    <p className="text-muted-foreground leading-relaxed">
+                      To protect your browser from security exploits, custom HTML templates execute in a sandboxed frame without external scripts. Rely on HTML and CSS.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Management */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Management</h3>
+              <div className="rounded-xl border border-border bg-card p-4 space-y-4">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Your custom templates are stored in local browser storage. Export a backup JSON file to keep your work safe.
+                </p>
+                <div className="flex flex-wrap gap-2">
                   <button 
-                    onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-3 bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                    type="button"
+                    onClick={handleExport}
+                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
                   >
-                    <Plus size={16} />
-                    Upload HTML
+                    <Download size={14} />
+                    Export Backup
                   </button>
                   <button 
-                    onClick={handleCreateBlank}
-                    className="inline-flex items-center gap-3 bg-muted text-foreground px-8 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-border transition-all border border-border"
+                    type="button"
+                    onClick={() => backupRef.current?.click()}
+                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
                   >
-                    <Code2 size={16} />
-                    Create Live
+                    <FileUp size={14} />
+                    Import JSON
                   </button>
                 </div>
               </div>
-            )
-          )}
-
-          {activeTab === 'settings' && (
-            <div className="max-w-2xl animate-in fade-in slide-in-from-left-4 duration-500">
-               <div className="space-y-8">
-                  <div className="space-y-4">
-                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary">System Information</h3>
-                     <div className="grid gap-2">
-                        <div className="flex items-center justify-between p-4 rounded-3xl bg-muted/30 border border-border">
-                           <div className="flex items-center gap-3">
-                              <Info size={16} className="text-muted-foreground" />
-                              <span className="text-[11px] font-bold uppercase tracking-wider">Version</span>
-                           </div>
-                           <span className="text-[11px] font-black font-mono text-primary">{browser.runtime.getManifest().version}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-3xl bg-muted/30 border border-border">
-                           <div className="flex items-center gap-3">
-                              <Monitor size={16} className="text-muted-foreground" />
-                              <span className="text-[11px] font-bold uppercase tracking-wider">Platform</span>
-                           </div>
-                           <span className="text-[11px] font-black font-mono text-primary">Web Extension</span>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="space-y-4">
-                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary">Security & Scripting</h3>
-                     <div className="p-6 rounded-3xl bg-muted/30 border border-border">
-                        <div className="flex items-start gap-4">
-                           <div className="p-2 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
-                              <ShieldCheck size={20} />
-                           </div>
-                           <div className="space-y-2">
-                              <h4 className="text-xs font-black uppercase tracking-wider">Scripts are Disabled</h4>
-                              <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
-                                 Due to browser extension security policies (CSP), all <code>&lt;script&gt;</code> tags are automatically removed. Your templates should rely strictly on HTML and CSS.
-                              </p>
-                              <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
-                                 We are working on a secure <strong>Widget API</strong> for future releases to bring back dynamic elements like clocks and weather safely.
-                              </p>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="space-y-4">
-                     <h3 className="text-[10px] font-black uppercase tracking-widest text-primary">Data Management</h3>
-                     <div className="p-6 rounded-3xl bg-muted/30 border border-border">
-                        <p className="text-xs text-muted-foreground font-medium mb-6 leading-relaxed">
-                           Your data is stored locally in your browser. You can export a backup of all your custom templates to move them to another machine.
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                           <button 
-                            onClick={handleExport}
-                            className="inline-flex items-center gap-2 bg-foreground text-background px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
-                           >
-                              <Download size={14} />
-                              Export Backup
-                           </button>
-                           <button 
-                            onClick={() => backupRef.current?.click()}
-                            className="inline-flex items-center gap-2 bg-muted text-foreground px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-border transition-all border border-border"
-                           >
-                              <FileUp size={14} />
-                              Import JSON
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </main>
+
+      {/* Minimal Footer */}
+      <footer className="max-w-4xl mx-auto w-full px-4 py-8 text-center text-xs text-muted-foreground border-t border-border mt-auto">
+        WYNTab • Write Your NewTab • Local Storage
+      </footer>
 
       {/* Large Preview Modal */}
       {previewTemplate && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-300">
-           <div className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setPreviewTemplate(null)} />
-           <div className="relative w-full max-w-6xl aspect-video bg-white rounded-2xl shadow-2xl overflow-hidden border border-border/50 flex flex-col scale-in animate-in zoom-in-95 duration-300">
-              <header className="h-16 flex items-center justify-between px-8 bg-background/50 backdrop-blur-xl border-b border-border shrink-0">
-                 <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                       <Eye size={20} />
-                    </div>
-                    <div>
-                       <h3 className="text-sm font-black uppercase tracking-tighter italic">{previewTemplate.name}</h3>
-                       <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Large Preview Mode</p>
-                    </div>
-                 </div>
-                 <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => { doActivate(previewTemplate); setPreviewTemplate(null); }}
-                      className="h-10 px-6 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all"
-                    >
-                      Activate Template
-                    </button>
-                    <button 
-                      onClick={() => setPreviewTemplate(null)}
-                      className="h-10 w-10 flex items-center justify-center rounded-xl bg-muted text-muted-foreground hover:bg-border transition-all"
-                    >
-                      <X size={20} />
-                    </button>
-                 </div>
-              </header>
-              <div className="flex-1 relative bg-white overflow-hidden">
-                 <iframe 
-                   srcDoc={`<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${previewTemplate.html}`}
-                   scrolling="no"
-                   className="absolute inset-0 w-full h-full border-none pointer-events-none"
-                   title="Large Preview"
-                   sandbox="allow-scripts allow-same-origin allow-forms"
-                 />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-background/80 backdrop-blur-xs">
+          <div className="w-full max-w-4xl h-[80vh] bg-card border border-border rounded-xl flex flex-col overflow-hidden shadow-2xl">
+            <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
+              <div className="flex items-center gap-2">
+                <Eye size={16} className="text-muted-foreground" />
+                <h3 className="text-sm font-semibold">{previewTemplate.name}</h3>
               </div>
-           </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  type="button"
+                  onClick={() => { doActivate(previewTemplate); setPreviewTemplate(null); }}
+                  className="h-7 px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
+                >
+                  Activate
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setPreviewTemplate(null)}
+                  className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
+                  title="Close preview"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </header>
+            <div className="flex-1 bg-white overflow-hidden">
+              <iframe 
+                srcDoc={`<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${previewTemplate.html}`}
+                scrolling="no"
+                className="w-full h-full border-none pointer-events-none"
+                title="Large Preview"
+                sandbox="allow-scripts allow-same-origin allow-forms"
+              />
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Status Toast Notification */}
       {status && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-110 animate-in fade-in slide-in-from-bottom-6 duration-500">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           <div className={cn(
-            'rounded-2xl border px-8 py-4 text-[11px] font-black uppercase tracking-widest shadow-2xl backdrop-blur-2xl whitespace-nowrap flex items-center gap-3', 
-            status.ok ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' : 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400'
+            'rounded-lg border px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-sm whitespace-nowrap flex items-center gap-2', 
+            status.ok ? 'border-border bg-card text-foreground' : 'border-destructive/40 bg-destructive/10 text-destructive'
           )}>
-            {status.ok ? <CheckCircle2 size={16} /> : <X size={16} />}
+            {status.ok ? <CheckCircle2 size={14} className="text-green-600" /> : <X size={14} />}
             {status.msg}
           </div>
         </div>
@@ -640,4 +644,7 @@ function Dashboard() {
 }
 
 // ─── App Root ──────────────────────────────────────────────────────────────
-createRoot(document.getElementById('root')!).render(<Dashboard />)
+const rootEl = document.getElementById('root')
+if (rootEl) {
+  createRoot(rootEl).render(<Dashboard />)
+}

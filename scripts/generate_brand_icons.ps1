@@ -6,7 +6,7 @@ if (-not (Test-Path $sourcePath)) {
     exit
 }
 
-function Create-BrandIcon {
+function New-BrandIcon {
     param (
         [int]$size,
         [string]$outputPath
@@ -54,5 +54,5 @@ function Create-BrandIcon {
 $sizes = @(16, 32, 48, 96, 128)
 
 foreach ($size in $sizes) {
-    Create-BrandIcon -size $size -outputPath "public/icon/$size.png"
+    New-BrandIcon -size $size -outputPath "public/icon/$size.png"
 }

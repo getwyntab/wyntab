@@ -22,11 +22,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Validate DESIGN.md spec
+        run: npm run design:lint
+
       - name: Type check
         run: bun run compile
 
-      - name: Run unit tests
-        run: bun run test
+      - name: Run unit & UI tests
+        run: npm test
 
       - name: Build Chrome MV3
         run: bun run build

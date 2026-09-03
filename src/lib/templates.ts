@@ -12,7 +12,7 @@ export interface Template {
   uploadedAt?: string
 }
 
-function filenameToName(filename: string): string {
+export function filenameToName(filename: string): string {
   return filename
     .replace(/\.html$/, '')
     .replace(/[-_]/g, ' ')

@@ -6,7 +6,7 @@ export default defineBackground(() => {
     }
   });
 
-  browser.action.onClicked.addListener(async (activeTab) => {
+  browser.action.onClicked.addListener(async () => {
     const dashboardUrl = browser.runtime.getURL('/dashboard.html');
 
     try {

@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-import { Sparkles, Upload, LayoutGrid, Zap, ArrowRight, Library, Code2 } from 'lucide-react'
+import { Zap, ArrowRight, Library, Code2 } from 'lucide-react'
 import '@/assets/tailwind.css'
 
 function Onboarding() {

@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import {
   Moon, Sun, Upload,
   CheckCircle2, Sparkles,
@@ -11,8 +11,10 @@ import { cn } from '@/lib/utils'
 import { getBuiltinTemplates, type Template } from '@/lib/templates'
 import { activeTemplateHtml, activeTemplateId, userTemplates } from '@/lib/storage'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { Editor } from '@/components/Editor'
 import { TemplateCard } from '@/components/TemplateCard'
+import { STARTER_HTML } from '@/lib/constants'
+
+const Editor = lazy(() => import('@/components/Editor'))
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Tab = 'built-in' | 'custom' | 'settings'
@@ -154,74 +156,16 @@ function Dashboard() {
   }
 
   async function handleCreateBlank() {
-    const starterHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Template</title>
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --fg: #ffffff;
-      --accent: #3b82f6;
-    }
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: system-ui, -apple-system, sans-serif;
-      text-align: center;
-    }
-    .container {
-      padding: 2rem;
-      border-radius: 2rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-    }
-    h1 {
-      font-size: 4rem;
-      font-weight: 900;
-      letter-spacing: -0.05em;
-      margin: 0;
-      background: linear-gradient(to bottom right, #fff, #666);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    p {
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.5);
-      margin-top: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-    }
-    .accent { color: var(--accent); }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>WYN<span class="accent">Tab</span></h1>
-    <p>Your journey begins here</p>
-  </div>
-</body>
-</html>`
-
     const newTemplate: Template = {
       id: `user-${Date.now()}`,
       name: 'Untitled Template',
-      html: starterHtml,
+      html: STARTER_HTML,
       isBuiltin: false,
       uploadedAt: new Date().toISOString(),
     }
 
     setEditingTemplate(newTemplate)
-    setEditorValue(starterHtml)
+    setEditorValue(STARTER_HTML)
   }
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -373,7 +317,13 @@ function Dashboard() {
                <div className="text-[10px] font-medium text-muted-foreground/60 italic">Live editing enabled</div>
             </div>
             <div className="grow overflow-hidden rounded-2xl border border-border shadow-inner">
-               <Editor value={editingTemplate.html} onChange={setEditorValue} darkMode={dark} />
+               <Suspense fallback={
+                 <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
+                   Loading editor...
+                 </div>
+               }>
+                 <Editor value={editingTemplate.html} onChange={setEditorValue} darkMode={dark} />
+               </Suspense>
             </div>
           </div>
           <div className="flex-1 border-l border-border flex flex-col p-6 overflow-hidden">

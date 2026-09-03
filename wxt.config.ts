@@ -4,10 +4,15 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
+  vite: () => ({
+    build: {
+      chunkSizeWarningLimit: 700,
+    },
+  }),
   manifest: {
       name: 'WYNTab',
       description: 'Write Your NewTab, lets you replace the default new tab page with your own custom HTML',
-      version: '0.4.0',
+      version: '0.4.1',
       action: {}, 
       permissions: ['tabs', 'storage', 'unlimitedStorage'],
       icons: {

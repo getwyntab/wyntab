@@ -275,7 +275,7 @@ export function Dashboard() {
 
   const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
     ? browser.runtime.getManifest().version
-    : '0.4.2'
+    : ''
 
   // ─── Editor View ────────────────────────────────────────────────────────────
   if (editingTemplate) {

@@ -1,5 +1,6 @@
 import { vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
+import pkg from '../package.json'
 
 // WebExtension browser API mock
 const storageData: Record<string, any> = {}
@@ -34,7 +35,7 @@ const fakeStorageArea = {
 const browserMock = {
   runtime: {
     id: 'test-mock-id',
-    getManifest: vi.fn(() => ({ version: '0.4.2', name: 'WYNTab' })),
+    getManifest: vi.fn(() => ({ version: pkg.version, name: pkg.name })),
     getURL: vi.fn((path: string) => `chrome-extension://mock-id${path}`),
     onInstalled: { addListener: vi.fn() },
   },

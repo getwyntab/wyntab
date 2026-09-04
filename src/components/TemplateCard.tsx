@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Check, X, Pencil, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type Template } from '@/lib/templates'
@@ -13,16 +13,27 @@ function Preview({ html }: { html?: string }) {
     )
   }
 
-  const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${html}`
+  // ponytail: static thumbnail needs no JS execution or form submission
+  const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+  const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${stripped}`
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-muted/40 border-b border-border">
+    <div className="relative aspect-video w-full overflow-hidden bg-muted/20 border-b border-border">
       <iframe
         srcDoc={styledHtml}
         scrolling="no"
-        className="absolute inset-0 h-[400%] w-[400%] origin-top-left scale-25 pointer-events-none border-none select-none"
-        title="Preview"
-        sandbox="allow-scripts allow-same-origin allow-forms"
+        loading="lazy"
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{
+          width: '400%',
+          height: '400%',
+          transform: 'scale(0.25)',
+          transformOrigin: '0 0',
+        }}
+        className="absolute inset-0 pointer-events-none border-none select-none"
+        title="Preview thumbnail"
+        sandbox=""
       />
     </div>
   )
@@ -64,9 +75,9 @@ export function TemplateCard({
     <div
       data-testid={`template-card-${template.id}`}
       className={cn(
-        "bg-card border rounded-xl flex flex-col justify-between overflow-hidden transition-colors duration-150 shadow-xs",
+        "bg-card border rounded-lg flex flex-col justify-between overflow-hidden transition-colors duration-150 shadow-xs w-full h-full",
         isActive
-          ? "border-primary ring-1 ring-primary/40"
+          ? "border-primary"
           : "border-border hover:border-muted-foreground/50"
       )}
     >
@@ -87,7 +98,7 @@ export function TemplateCard({
       >
         <Preview html={template.html} />
         {/* Subtle hover badge */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity bg-background/90 backdrop-blur-xs text-foreground text-xs font-medium px-2 py-0.5 rounded-md border border-border shadow-xs pointer-events-none">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity bg-background/95 text-foreground text-xs font-medium px-2 py-0.5 rounded-md border border-border shadow-xs pointer-events-none">
           Click to Preview
         </div>
       </div>
@@ -110,13 +121,13 @@ export function TemplateCard({
                       setEditName(template.name)
                     }
                   }}
-                  className="w-full bg-muted border border-primary rounded-md px-2 py-1 text-xs font-medium outline-none"
+                  className="w-full bg-muted border border-border focus:border-primary rounded-md px-2 py-1 text-xs font-medium outline-none text-foreground"
                   aria-label="Rename template"
                 />
                 <button
                   type="button"
                   onClick={handleRename}
-                  className="p-1 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
+                  className="p-1 text-foreground hover:text-primary transition-colors"
                   title="Save name"
                 >
                   <Check size={14} />
@@ -156,17 +167,17 @@ export function TemplateCard({
             </span>
           </div>
 
-          {/* Primary Action */}
+          {/* Primary Action (Unified geometry: h-7 px-3 rounded-lg text-xs) */}
           <div className="shrink-0">
             {isActive ? (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary text-primary-foreground">
-                <CheckCircle2 size={12} /> Active
+              <span className="inline-flex items-center justify-center gap-1.5 h-7 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold select-none shadow-xs">
+                <CheckCircle2 size={13} /> Active
               </span>
             ) : (
               <button
                 type="button"
                 onClick={onActivate}
-                className="h-7 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center justify-center h-7 px-3 rounded-lg border border-border bg-background hover:bg-muted text-foreground text-xs font-medium transition-colors cursor-pointer shadow-xs"
               >
                 Activate
               </button>
@@ -220,3 +231,4 @@ export function TemplateCard({
     </div>
   )
 }
+

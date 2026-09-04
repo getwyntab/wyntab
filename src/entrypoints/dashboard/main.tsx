@@ -32,7 +32,7 @@ function useDarkMode() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
-    localStorage.setItem('wyn-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('wyn-dashboard-theme', dark ? 'dark' : 'light')
   }, [dark])
 
   return [dark, setDark] as const
@@ -351,9 +351,9 @@ export function Dashboard() {
 
       {/* Top Masthead */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-xs">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           {/* Brand */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0 z-10">
             <div className="bg-primary text-primary-foreground p-1.5 rounded-lg shadow-xs">
               <img src="/icon/128.png" className="w-4 h-4 brightness-0 invert dark:invert-0" alt="WYNTab" />
             </div>
@@ -363,8 +363,8 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Nav Tabs */}
-          <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Views">
+          {/* Nav Tabs (Dead centered on desktop) */}
+          <nav className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 flex items-center gap-1 overflow-x-auto" aria-label="Views">
             <button 
               type="button"
               data-testid="tab-built-in"
@@ -401,7 +401,7 @@ export function Dashboard() {
           </nav>
 
           {/* Theme Toggle */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 z-10">
             <button 
               type="button"
               onClick={() => setDark(!dark)} 
@@ -416,7 +416,7 @@ export function Dashboard() {
       </header>
 
       {/* Main Centered Content Stream */}
-      <main className="max-w-4xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 flex-1 space-y-6">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border">
           <div>
@@ -456,7 +456,7 @@ export function Dashboard() {
 
         {/* Built-in Gallery Stream */}
         {activeTab === 'built-in' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {builtins.map((t) => (
               <TemplateCard
                 key={t.id}
@@ -476,7 +476,7 @@ export function Dashboard() {
         {/* Custom Library Stream */}
         {activeTab === 'custom' && (
           userList.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {userList.map((t) => (
                 <TemplateCard
                   key={t.id}
@@ -495,7 +495,7 @@ export function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="max-w-md mx-auto w-full rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center gap-3 my-6">
+            <div className="max-w-md mx-auto w-full rounded-lg border border-dashed border-border p-8 text-center flex flex-col items-center gap-3 my-6">
               <div className="h-10 w-10 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground">
                 <Code2 size={20} />
               </div>
@@ -529,11 +529,11 @@ export function Dashboard() {
 
         {/* Settings Stream */}
         {activeTab === 'settings' && (
-          <div className="max-w-xl space-y-6">
+          <div className="w-full space-y-6">
             {/* System Information */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">System Information</h3>
-              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+              <div className="rounded-lg border border-border bg-card p-4 space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <Info size={14} /> Version
@@ -552,7 +552,7 @@ export function Dashboard() {
             {/* Security & CSP */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Security</h3>
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="rounded-lg border border-border bg-card p-4">
                 <div className="flex items-start gap-3">
                   <ShieldCheck size={18} className="text-muted-foreground mt-0.5" />
                   <div className="text-xs space-y-1">
@@ -568,7 +568,7 @@ export function Dashboard() {
             {/* Data Management */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Management</h3>
-              <div className="rounded-xl border border-border bg-card p-4 space-y-4">
+              <div className="rounded-lg border border-border bg-card p-4 space-y-4">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Your custom templates are stored in local browser storage. Export a backup JSON file to keep your work safe.
                 </p>
@@ -597,14 +597,14 @@ export function Dashboard() {
       </main>
 
       {/* Minimal Footer */}
-      <footer className="max-w-4xl mx-auto w-full px-4 py-8 text-center text-xs text-muted-foreground border-t border-border mt-auto">
+      <footer className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 text-center text-xs text-muted-foreground border-t border-border mt-auto">
         WYNTab • Write Your NewTab • Local Storage
       </footer>
 
       {/* Large Preview Modal */}
       {previewTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-background/80 backdrop-blur-xs">
-          <div className="w-full max-w-3xl h-[75vh] max-h-[580px] bg-card border border-border rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+          <div className="w-full max-w-3xl h-[75vh] max-h-[580px] bg-card border border-border rounded-lg flex flex-col overflow-hidden shadow-2xl">
             <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-2">
                 <Eye size={16} className="text-muted-foreground" />
@@ -614,14 +614,14 @@ export function Dashboard() {
                 <button 
                   type="button"
                   onClick={() => { doActivate(previewTemplate); setPreviewTemplate(null); }}
-                  className="h-7 px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
+                  className="h-7 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
                 >
                   Activate
                 </button>
                 <button 
                   type="button"
                   onClick={() => setPreviewTemplate(null)}
-                  className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
+                  className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
                   title="Close preview"
                 >
                   <X size={16} />

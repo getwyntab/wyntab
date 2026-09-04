@@ -17,7 +17,7 @@ export function Onboarding() {
       <div className="max-w-lg w-full space-y-8 text-center">
         {/* Logo and Brand */}
         <div className="flex flex-col items-center gap-3">
-          <div className="bg-primary text-primary-foreground p-3 rounded-xl shadow-xs">
+          <div className="bg-primary text-primary-foreground p-3 rounded-lg shadow-xs">
             <img src="/icon/128.png" className="w-8 h-8 brightness-0 invert dark:invert-0" alt="WYNTab" />
           </div>
           <div>
@@ -28,7 +28,7 @@ export function Onboarding() {
 
         {/* Feature Highlights */}
         <div className="space-y-3 text-left">
-          <div className="p-3.5 rounded-xl border border-border bg-card flex items-start gap-3">
+          <div className="p-3.5 rounded-lg border border-border bg-card flex items-start gap-3">
             <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
               <Library size={18} />
             </div>
@@ -40,7 +40,7 @@ export function Onboarding() {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl border border-border bg-card flex items-start gap-3">
+          <div className="p-3.5 rounded-lg border border-border bg-card flex items-start gap-3">
             <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
               <Code2 size={18} />
             </div>
@@ -52,7 +52,7 @@ export function Onboarding() {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl border border-border bg-card flex items-start gap-3">
+          <div className="p-3.5 rounded-lg border border-border bg-card flex items-start gap-3">
             <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
               <RefreshCw size={18} />
             </div>

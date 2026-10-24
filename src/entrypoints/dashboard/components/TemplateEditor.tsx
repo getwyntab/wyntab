@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import {
   ArrowLeft, Save, RotateCcw,
-  Sun, Moon, CheckCircle2,
-  AlertCircle, RotateCw, Maximize2, Minimize2
+  HelpCircle, RotateCw, Maximize2, Minimize2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type Template } from '@/lib/templates'
@@ -11,23 +10,17 @@ const Editor = lazy(() => import('@/components/Editor'))
 
 interface TemplateEditorProps {
   template: Template
-  isActive: boolean
   onBack: () => void
   onSave: (name: string, html: string) => Promise<void>
-  onSetActive: () => Promise<void>
   darkMode: boolean
-  onToggleTheme: () => void
   onRequestDiscard: () => void
 }
 
 export function TemplateEditor({
   template,
-  isActive,
   onBack,
   onSave,
-  onSetActive,
   darkMode,
-  onToggleTheme,
   onRequestDiscard,
 }: TemplateEditorProps) {
   const [title, setTitle] = useState(template.name)
@@ -173,7 +166,7 @@ export function TemplateEditor({
           )}
         </div>
 
-        {/* Right: Actions (Discard, Save, Set Active, Theme) */}
+        {/* Right: Actions (Discard, Save) */}
         <div className="flex items-center gap-2 shrink-0">
           {isDirty && (
             <button
@@ -196,35 +189,6 @@ export function TemplateEditor({
             <Save size={13} />
             <span>Save</span>
           </button>
-
-          {isActive ? (
-            <span className="h-8 px-3 rounded-md bg-bg-accent-bright text-accent-bright border border-accent-main/40 text-[12px] font-semibold flex items-center gap-1.5 select-none">
-              <CheckCircle2 size={13} />
-              <span>Active Tab</span>
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={async () => {
-                await handleSave()
-                await onSetActive()
-              }}
-              className="h-8 px-3 rounded-md bg-bg-a2 hover:bg-bg-a4 border border-divider-dim hover:border-divider-bright text-text-primary text-[12px] font-semibold transition-colors"
-              title="Save and set this template as globally active"
-            >
-              Set Active
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            className="h-8 w-8 rounded-md bg-bg-a2 hover:bg-bg-a4 border border-divider-dim text-text-muted hover:text-text-primary flex items-center justify-center transition-colors"
-            title="Toggle theme"
-            aria-label="Toggle theme"
-          >
-            {darkMode ? <Sun size={14} className="text-accent-bright" /> : <Moon size={14} className="text-accent-main" />}
-          </button>
         </div>
       </header>
 
@@ -241,10 +205,10 @@ export function TemplateEditor({
             <div className="flex items-center gap-1.5 group relative">
               <span className="text-[11px] text-text-subtle font-mono">HTML & CSS</span>
               <div
-                className="cursor-help flex items-center text-danger-main hover:opacity-80"
-                title="HTML & CSS only. Scripts and event handlers are blocked for extension security."
+                className="cursor-help flex items-center text-text-muted hover:text-text-primary transition-colors"
+                title="JavaScript execution is disabled for browser security. Chrome extension sandbox policies block arbitrary script execution to prevent credential leakage and cross-site scripting (XSS). Build dynamic UI using CSS animations, forms, and SVG."
               >
-                <AlertCircle size={13} />
+                <HelpCircle size={13} />
               </div>
             </div>
           </div>

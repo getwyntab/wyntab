@@ -205,11 +205,6 @@ export function Dashboard() {
     showToast('Changes saved.', true)
   }
 
-  async function handleSetActiveFromEditor() {
-    if (!editingTemplate) return
-    await doActivate(editingTemplate)
-  }
-
   function handleBackToLibrary() {
     setEditingTemplate(null)
     setIsNewDraft(false)
@@ -316,12 +311,9 @@ export function Dashboard() {
       <div className={cn("h-screen w-screen bg-bg-b1 text-text-primary", dark && "dark")}>
         <TemplateEditor
           template={editingTemplate}
-          isActive={activeId === editingTemplate.id}
           onBack={handleBackToLibrary}
           onSave={handleSaveEditor}
-          onSetActive={handleSetActiveFromEditor}
           darkMode={dark}
-          onToggleTheme={() => setDark(!dark)}
           onRequestDiscard={handleBackToLibrary}
         />
 

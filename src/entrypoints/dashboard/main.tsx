@@ -282,7 +282,7 @@ export function Dashboard() {
   if (editingTemplate) {
     return (
       <div className={cn("h-screen bg-background text-foreground flex flex-col font-sans", dark && "dark")}>
-        <header className="border-b border-border h-14 flex items-center justify-between px-4 sm:px-6 shrink-0 bg-card">
+        <header className="border-b border-border h-14 flex items-center justify-between px-6 shrink-0 bg-card">
           <div className="flex items-center gap-3 min-w-0">
             <button 
               type="button"
@@ -345,7 +345,7 @@ export function Dashboard() {
 
       {/* Top Masthead */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           {/* Brand */}
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="bg-primary text-primary-foreground p-1.5 rounded-lg shadow-xs">
@@ -358,13 +358,13 @@ export function Dashboard() {
           </div>
 
           {/* Nav Tabs */}
-          <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Views">
+          <nav className="flex items-center gap-1.5" aria-label="Views">
             <button 
               type="button"
               data-testid="tab-built-in"
               onClick={() => setActiveTab('built-in')}
               className={cn(
-                "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer",
                 activeTab === 'built-in' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -375,7 +375,7 @@ export function Dashboard() {
               data-testid="tab-custom"
               onClick={() => setActiveTab('custom')}
               className={cn(
-                "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer",
                 activeTab === 'custom' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -386,7 +386,7 @@ export function Dashboard() {
               data-testid="tab-settings"
               onClick={() => setActiveTab('settings')}
               className={cn(
-                "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer",
                 activeTab === 'settings' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -399,7 +399,7 @@ export function Dashboard() {
             <button 
               type="button"
               onClick={() => setDark(!dark)} 
-              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               title="Toggle theme"
               aria-label="Toggle theme"
             >
@@ -409,10 +409,10 @@ export function Dashboard() {
         </div>
       </header>
 
-      {/* Main Centered Content Stream */}
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 flex-1 space-y-6">
+      {/* Main Desktop Workspace */}
+      <main className="max-w-7xl mx-auto w-full px-6 py-6 flex-1 space-y-6">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border">
+        <div className="flex items-center justify-between gap-4 pb-4 border-b border-border">
           <div>
             <h2 className="text-base font-bold text-foreground">
               {activeTab === 'built-in' && 'Built-in Gallery'}
@@ -431,7 +431,7 @@ export function Dashboard() {
               <button 
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5"
+                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus size={14} />
                 Upload HTML
@@ -439,7 +439,7 @@ export function Dashboard() {
               <button 
                 type="button"
                 onClick={handleExport}
-                className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+                className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5 cursor-pointer"
               >
                 <Download size={14} />
                 Export
@@ -450,7 +450,7 @@ export function Dashboard() {
 
         {/* Built-in Gallery Stream */}
         {activeTab === 'built-in' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {builtins.map((t) => (
               <TemplateCard
                 key={t.id}
@@ -468,7 +468,7 @@ export function Dashboard() {
         {/* Custom Library Stream */}
         {activeTab === 'custom' && (
           userList.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {userList.map((t) => (
                 <TemplateCard
                   key={t.id}
@@ -487,7 +487,7 @@ export function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="max-w-md mx-auto w-full rounded-lg border border-dashed border-border p-8 text-center flex flex-col items-center gap-3 my-6">
+            <div className="max-w-lg mx-auto w-full rounded-lg border border-dashed border-border p-10 text-center flex flex-col items-center gap-3 my-8">
               <div className="h-10 w-10 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground">
                 <Code2 size={20} />
               </div>
@@ -501,7 +501,7 @@ export function Dashboard() {
                 <button 
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="h-8 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5"
+                  className="h-8 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus size={14} />
                   Upload HTML
@@ -509,7 +509,7 @@ export function Dashboard() {
                 <button 
                   type="button"
                   onClick={handleCreateBlank}
-                  className="h-8 px-3.5 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5"
+                  className="h-8 px-3.5 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5 cursor-pointer"
                 >
                   <Code2 size={14} />
                   Create Live
@@ -590,8 +590,8 @@ export function Dashboard() {
 
       {/* Large Preview Modal */}
       {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-background/80">
-          <div className="w-full max-w-3xl h-[75vh] max-h-[580px] bg-card border border-border rounded-lg flex flex-col overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/80">
+          <div className="w-full max-w-5xl h-[85vh] bg-card border border-border rounded-lg flex flex-col overflow-hidden shadow-2xl">
             <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-2">
                 <Eye size={16} className="text-muted-foreground" />

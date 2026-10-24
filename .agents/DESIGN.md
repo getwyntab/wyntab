@@ -1,7 +1,7 @@
 ---
 version: "alpha"
 name: WYNTab
-description: "Design system for WYNTab browser extension across popup, sidebar, and desktop viewports"
+description: "Design system for WYNTab browser extension full-tab dashboard and newtab surfaces"
 colors:
   primary: "#111827"
   primary-hover: "#1F2937"
@@ -118,11 +118,11 @@ Typography uses the native system font stack (`system-ui, sans-serif`) for insta
 
 ## Layout
 
-The UI operates across three responsive form factors:
+The UI operates as a dedicated full-page desktop application (>= 768px, optimized for standard 1080p and widescreen displays):
 
-1. **Extension Popup (360px - 420px)**: Compact vertical column. Navigation renders as a clean top tab strip. Template cards stack in a single column.
-2. **Side Panel (320px - 450px)**: Vertical flow optimized for narrow sidebars. Controls and headers shrink padding (`spacing.sm` to `spacing.md`).
-3. **Full Tab / Desktop (>= 768px)**: Left-side navigation bar with responsive multi-column template grid (`spacing.lg` gutters).
+- **Dashboard Workspace**: Full-width canvas with responsive multi-column template grid (`spacing.lg` gutters).
+- **Navigation & Controls**: Unconstrained desktop toolbars and sidebars with clear, direct action triggers.
+- **Editor Canvas**: Spacious layout for side-by-side or full-height code authoring and live sandboxed previewing.
 
 ## Elevation & Depth
 
@@ -153,7 +153,7 @@ Shapes follow restrained geometric radii:
 
 ## Do's and Don'ts
 
-- **Do** support narrow 360px viewports without horizontal scrolling.
+- **Do** support clean responsive desktop layouts (>= 768px) without horizontal scrolling.
 - **Do** keep actions visible or accessible via keyboard/touch, not hover-only overlays.
 - **Do** maintain WCAG AA contrast (minimum 4.5:1) for all text and interactive elements.
 - **Don't** add decorative glowing corner brackets, blur pseudo-elements, or cybernetic borders.

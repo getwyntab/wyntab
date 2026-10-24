@@ -9,7 +9,7 @@ This file sets non-negotiable instructions and project context for any AI agent 
 
 ### Core Architecture & Entrypoints
 - **New Tab (`src/entrypoints/newtab/`)**: Custom new tab page. Retrieves active template HTML from `browser.storage.local` and renders inside an `iframe` via `srcdoc` with sandbox (`allow-scripts allow-same-origin allow-forms`). Avoids `blob:` URL CSP blocks.
-- **Dashboard (`src/entrypoints/dashboard/`)**: Management interface. Supports template activation, preview, upload, duplicate, rename, JSON backup export/import, and integrated code editing. Responsive across popup, side panel, and desktop.
+- **Dashboard (`src/entrypoints/dashboard/`)**: Management interface. Supports template activation, preview, upload, duplicate, rename, JSON backup export/import, and integrated code editing. Operates as a full-page desktop tab.
 - **Editor (`src/components/Editor.tsx`)**: CodeMirror 6 based component for direct HTML/CSS editing.
 - **Onboarding (`src/entrypoints/onboarding/`)**: Welcome page shown on installation.
 - **Background (`src/entrypoints/background.ts`)**: Handles extension action click and `onInstalled` lifecycle events.
@@ -73,15 +73,12 @@ Never produce AI design slop:
 - **No Hover-Only Controls**: Primary actions (Activate, Edit, Preview, Delete) must remain directly accessible via touch and keyboard navigation, not locked behind mouse hover states.
 
 ### Viewport Responsiveness Contract
-WYNTab operates across three distinct browser extension environments:
-1. **Extension Popup**: Width 360px - 420px, max height 600px.
-   - Navigation: Top compact tab strip (no fixed 256px sidebar).
-   - Card lists: Single column stack (`grid-cols-1`).
-   - Zero horizontal scrollbars.
-2. **Extension Side Panel**: Width 320px - 450px, full window height.
-   - Vertical density: Compact paddings (`p-3` to `p-4`), concise button labels.
-3. **Full Tab / Desktop**: Width >= 768px.
-   - Left-hand navigation sidebar, multi-column card grid (`sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`).
+WYNTab Dashboard operates as a dedicated full-tab desktop application:
+1. **Full Tab / Desktop (>= 768px)**:
+   - Target viewports: standard 1080p, 1440p, and widescreen desktop displays.
+   - Fluid multi-column card grid (`sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`).
+   - Integrated full-canvas code editing workspace and full-size template preview modals.
+   - Zero compromised mobile-first layouts or squished 320px constraints (popup and side panel are not supported surfaces).
 
 ---
 

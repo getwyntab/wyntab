@@ -300,7 +300,7 @@ export function Dashboard() {
 
   const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
     ? browser.runtime.getManifest().version
-    : '0.5.3'
+    : '0.5.4'
 
   // ─── VIEW 4: Full-Screen Template Editor ────────────────────────────────────
   if (editingTemplate) {
@@ -368,7 +368,6 @@ export function Dashboard() {
         onSelectNav={setActiveNav}
         darkMode={dark}
         onToggleTheme={() => setDark(!dark)}
-        version={manifestVersion}
       />
 
       {/* Main Content Area */}

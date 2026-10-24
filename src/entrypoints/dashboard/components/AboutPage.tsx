@@ -1,4 +1,5 @@
 import { ShieldCheck, ExternalLink, Cpu } from 'lucide-react'
+import { BrandIcon } from '@/components/BrandIcon'
 
 interface AboutPageProps {
   version?: string
@@ -12,18 +13,12 @@ function GithubIcon({ className = "w-3 h-3" }: { className?: string }) {
   )
 }
 
-export function AboutPage({ version = '0.5.3' }: AboutPageProps) {
+export function AboutPage({ version = '0.5.4' }: AboutPageProps) {
   return (
     <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full space-y-8 select-none">
       {/* Brand Header */}
       <div className="flex items-center gap-4 border-b border-divider-dim pb-6">
-        <div className="w-14 h-14 rounded-lg bg-accent-main/15 border border-accent-main/30 flex items-center justify-center p-3">
-          <img
-            src="/icon/128.png"
-            alt="WYNTab emblem"
-            className="w-full h-full object-contain"
-          />
-        </div>
+        <BrandIcon size="lg" alt="WYNTab emblem" />
         <div>
           <h2 className="text-xl font-bold text-text-primary tracking-tight">WYNTab</h2>
           <p className="text-[13px] text-text-muted mt-0.5">
@@ -86,4 +81,3 @@ export function AboutPage({ version = '0.5.3' }: AboutPageProps) {
     </div>
   )
 }
-

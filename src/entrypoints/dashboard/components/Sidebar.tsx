@@ -1,5 +1,6 @@
 import { LayoutGrid, Sliders, Info, Sun, Moon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { BrandIcon } from '@/components/BrandIcon'
 
 export type DashboardNav = 'templates' | 'settings' | 'about'
 
@@ -8,7 +9,6 @@ interface SidebarProps {
   onSelectNav: (nav: DashboardNav) => void
   darkMode: boolean
   onToggleTheme: () => void
-  version?: string
 }
 
 export function Sidebar({
@@ -16,25 +16,15 @@ export function Sidebar({
   onSelectNav,
   darkMode,
   onToggleTheme,
-  version = '0.5.3',
 }: SidebarProps) {
   return (
     <aside className="w-60 h-screen shrink-0 bg-bg-b1 border-r border-divider-dim flex flex-col justify-between select-none">
       {/* Top Brand Header (Centered Violentmonkey style) */}
       <div className="pt-7 pb-6 px-4 flex flex-col items-center border-b border-divider-dim">
-        <div className="w-10 h-10 rounded-md bg-accent-main/15 border border-accent-main/30 flex items-center justify-center p-2 mb-2.5">
-          <img
-            src="/icon/128.png"
-            alt="WYNTab logo"
-            className="w-full h-full object-contain"
-          />
-        </div>
-        <h1 className="text-[15px] font-bold text-text-primary tracking-tight leading-none mb-1">
+        <BrandIcon size="md" className="mb-2.5" />
+        <h1 className="text-[15px] font-bold text-text-primary tracking-tight leading-none">
           WYNTab
         </h1>
-        <span className="text-[11px] font-mono text-text-subtle">
-          v{version}
-        </span>
       </div>
 
       {/* Main Navigation Links */}
@@ -101,4 +91,3 @@ export function Sidebar({
     </aside>
   )
 }
-

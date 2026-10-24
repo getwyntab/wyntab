@@ -28,7 +28,7 @@ export function AboutPage({ version = '0.5.0' }: AboutPageProps) {
       </div>
 
       {/* Runtime Environment Specs */}
-      <section className="bg-bg-a1 border border-divider-dim rounded-md p-5 space-y-3">
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-3">
         <div className="flex items-center gap-2 text-text-primary font-semibold text-[14px]">
           <Cpu size={16} className="text-accent-main" />
           <span>Extension Specifications</span>
@@ -54,7 +54,7 @@ export function AboutPage({ version = '0.5.0' }: AboutPageProps) {
       </section>
 
       {/* Security Architecture Callout */}
-      <section className="border-l-3 border-accent-main bg-bg-a1 border-y border-r border-divider-dim rounded-r-md p-5 flex items-start gap-3">
+      <section className="border-l-3 border-accent-main bg-bg-a2/40 border-y border-r border-divider-dim rounded-r-md p-5 flex items-start gap-3">
         <Shield size={18} className="text-accent-bright shrink-0 mt-0.5" />
         <div className="text-[12px] space-y-1">
           <h4 className="font-semibold text-text-primary">Sandboxed Execution Model</h4>

@@ -68,7 +68,7 @@ export function TemplateCard({
     <div
       data-testid={`template-card-${template.id}`}
       className={cn(
-        "bg-bg-a1 border rounded-md flex flex-col justify-between overflow-hidden transition-all duration-150 w-full shadow-xs",
+        "bg-bg-a2/40 border rounded-md flex flex-col justify-between overflow-hidden transition-all duration-150 w-full shadow-xs",
         isActive
           ? "border-accent-main ring-1 ring-accent-main/30"
           : "border-divider-dim hover:border-divider-bright"

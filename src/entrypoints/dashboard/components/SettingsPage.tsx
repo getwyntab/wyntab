@@ -34,7 +34,7 @@ export function SettingsPage({
       </div>
 
       {/* Section 1: Data Portability & Backup */}
-      <section className="bg-bg-a1 border border-divider-dim rounded-md p-5 space-y-4">
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-4">
         <div className="flex items-center gap-2.5">
           <Database size={16} className="text-accent-main" />
           <h3 className="text-[14px] font-semibold text-text-primary">Data Backup & Restore</h3>
@@ -74,7 +74,7 @@ export function SettingsPage({
       </section>
 
       {/* Section 2: Storage Diagnostics */}
-      <section className="bg-bg-a1 border border-divider-dim rounded-md p-5 space-y-3">
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-3">
         <h3 className="text-[14px] font-semibold text-text-primary">Storage Diagnostics</h3>
         <div className="divide-y divide-divider-dim text-[12px]">
           <div className="py-2.5 flex items-center justify-between">

@@ -423,7 +423,7 @@ export function Dashboard() {
                   </div>
                 ) : (
                   /* Clean Instructional Empty State */
-                  <div className="max-w-md mx-auto my-16 p-8 rounded-md border border-dashed border-divider-bright text-center space-y-3 bg-bg-a1">
+                  <div className="max-w-md mx-auto my-16 p-8 rounded-md border border-dashed border-divider-bright text-center space-y-3 bg-bg-a2/40">
                     <h3 className="text-sm font-semibold text-text-primary">No Custom Templates Yet</h3>
                     <p className="text-xs text-text-muted leading-relaxed">
                       Use the <strong className="text-accent-bright font-semibold">+</strong> (New Template) or <strong className="text-text-primary font-semibold">Upload</strong> icon buttons in the top right toolbar to add your first template.

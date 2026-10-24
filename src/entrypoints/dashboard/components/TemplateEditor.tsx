@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import {
   ArrowLeft, Save, RotateCcw,
-  HelpCircle, RotateCw, Maximize2, Minimize2
+  RotateCw, Maximize2, Minimize2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type Template } from '@/lib/templates'
@@ -27,6 +27,8 @@ export function TemplateEditor({
   const [code, setCode] = useState(template.html)
   const [initialTitle, setInitialTitle] = useState(template.name)
   const [initialCode, setInitialCode] = useState(template.html)
+  const [showJsInfo, setShowJsInfo] = useState(false)
+  const jsInfoRef = useRef<HTMLDivElement>(null)
 
   // Splitter ratio (percentage for left pane)
   const [splitRatio, setSplitRatio] = useState<number>(() => {
@@ -66,6 +68,17 @@ export function TemplateEditor({
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [isDirty])
+
+  // Dismiss JS info popover on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (jsInfoRef.current && !jsInfoRef.current.contains(e.target as Node)) {
+        setShowJsInfo(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Splitter dragging logic
   useEffect(() => {
@@ -206,13 +219,46 @@ export function TemplateEditor({
           {/* Editor Header Strip (32px) */}
           <div className="h-8 px-3 bg-bg-a3 border-b border-divider-dim flex items-center justify-between shrink-0 select-none">
             <span className="text-[12px] font-mono text-text-secondary">index.html</span>
-            <div className="flex items-center gap-1.5 group relative">
-              <span className="text-[11px] text-text-subtle font-mono">HTML & CSS</span>
-              <div
-                className="cursor-help flex items-center text-text-muted hover:text-text-primary transition-colors"
-                title="JavaScript execution is disabled for browser security. Chrome extension sandbox policies block arbitrary script execution to prevent credential leakage and cross-site scripting (XSS). Build dynamic UI using CSS animations, forms, and SVG."
+            <div ref={jsInfoRef} className="flex items-center gap-1.5 group relative">
+              <span className="text-[12px] text-text-subtle font-mono">HTML & CSS</span>
+              <button
+                type="button"
+                onClick={() => setShowJsInfo((prev) => !prev)}
+                className="flex items-center text-text-muted hover:text-text-primary transition-colors cursor-pointer select-none focus:outline-none"
+                aria-label="Why JavaScript is disabled"
               >
-                <HelpCircle size={13} />
+                <svg
+                  width={14}
+                  height={14}
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className="shrink-0"
+                  aria-hidden="true"
+                >
+                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z" />
+                </svg>
+              </button>
+
+              {/* Tooltip / Popover explaining why JS is disabled */}
+              <div
+                className={cn(
+                  "absolute right-0 top-full mt-2 w-80 p-3.5 rounded-lg bg-bg-a1 border border-divider-bright shadow-2xl z-50 text-left transition-all duration-150 pointer-events-auto",
+                  showJsInfo
+                    ? "opacity-100 visible translate-y-0"
+                    : "opacity-0 invisible -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0"
+                )}
+              >
+                <div className="flex items-center gap-1.5 text-accent-bright font-semibold text-[12px] mb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-bright" />
+                  <span>Why JavaScript is disabled</span>
+                </div>
+                <p className="text-[12px] leading-relaxed text-text-secondary mb-2.5">
+                  Chrome extension security sandbox restricts arbitrary <code className="px-1 py-0.5 rounded bg-bg-a3 font-mono text-text-primary text-[12px]">&lt;script&gt;</code> tags and inline event handlers to safeguard browser credentials and prevent cross-site scripting (XSS).
+                </p>
+                <div className="pt-2 border-t border-divider-dim flex items-center justify-between text-[12px] text-text-muted">
+                  <span>Supported</span>
+                  <span className="font-mono text-text-primary font-medium">HTML5 + CSS3 Animations</span>
+                </div>
               </div>
             </div>
           </div>
@@ -256,7 +302,7 @@ export function TemplateEditor({
           {/* Preview Header Strip (32px) */}
           <div className="h-8 px-3 bg-bg-a3 border-b border-divider-dim flex items-center justify-between shrink-0 select-none">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-success-main" />
+              <span className="w-2 h-2 rounded-full bg-accent-main" />
               <span className="text-[12px] font-medium text-text-secondary">Live Render</span>
             </div>
 

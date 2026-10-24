@@ -87,7 +87,7 @@ export function SettingsPage({
           </div>
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Storage Capacity</span>
-            <span className="font-mono text-success-main font-semibold">Unlimited (unlimitedStorage permission)</span>
+            <span className="font-mono text-accent-bright font-medium">Unlimited (unlimitedStorage permission)</span>
           </div>
         </div>
       </section>

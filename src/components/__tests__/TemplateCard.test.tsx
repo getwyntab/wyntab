@@ -33,7 +33,8 @@ describe('TemplateCard component', () => {
 
     expect(screen.getByText('Minimal Clock')).toBeInTheDocument()
     expect(screen.getByText('Built-in template')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /activate/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^activate$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^preview$/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /duplicate to customize/i })).toBeInTheDocument()
   })
 
@@ -66,7 +67,7 @@ describe('TemplateCard component', () => {
       />
     )
 
-    const activateBtn = screen.getByRole('button', { name: /activate/i })
+    const activateBtn = screen.getByRole('button', { name: /^activate$/i })
     fireEvent.click(activateBtn)
     expect(handleActivate).toHaveBeenCalledTimes(1)
   })
@@ -89,6 +90,24 @@ describe('TemplateCard component', () => {
     expect(handlePreview).toHaveBeenCalledTimes(1)
   })
 
+  it('calls onPreview when clicking Preview text action button', () => {
+    const handlePreview = vi.fn()
+    render(
+      <TemplateCard
+        template={mockBuiltinTemplate}
+        isActive={false}
+        onActivate={vi.fn()}
+        onDuplicate={vi.fn()}
+        onEditCode={vi.fn()}
+        onPreview={handlePreview}
+      />
+    )
+
+    const previewBtn = screen.getByRole('button', { name: /^preview$/i })
+    fireEvent.click(previewBtn)
+    expect(handlePreview).toHaveBeenCalledTimes(1)
+  })
+
   it('calls onPreview with Enter key on thumbnail frame for keyboard accessibility', () => {
     const handlePreview = vi.fn()
     render(
@@ -107,7 +126,8 @@ describe('TemplateCard component', () => {
     expect(handlePreview).toHaveBeenCalledTimes(1)
   })
 
-  it('provides edit, duplicate, and delete text actions for custom templates', () => {
+  it('provides preview, edit, duplicate, and delete text actions for custom templates', () => {
+    const handlePreview = vi.fn()
     const handleEdit = vi.fn()
     const handleDuplicate = vi.fn()
     const handleDelete = vi.fn()
@@ -120,15 +140,19 @@ describe('TemplateCard component', () => {
         onDuplicate={handleDuplicate}
         onEditCode={handleEdit}
         onDelete={handleDelete}
-        onPreview={vi.fn()}
+        onPreview={handlePreview}
       />
     )
 
     expect(screen.getByText('Custom template')).toBeInTheDocument()
 
+    const previewBtn = screen.getByRole('button', { name: /^preview$/i })
     const editBtn = screen.getByRole('button', { name: /edit html/i })
-    const duplicateBtn = screen.getByRole('button', { name: /duplicate/i })
+    const duplicateBtn = screen.getByRole('button', { name: /^duplicate$/i })
     const deleteBtn = screen.getByRole('button', { name: /delete/i })
+
+    fireEvent.click(previewBtn)
+    expect(handlePreview).toHaveBeenCalledTimes(1)
 
     fireEvent.click(editBtn)
     expect(handleEdit).toHaveBeenCalledTimes(1)

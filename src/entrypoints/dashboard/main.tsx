@@ -24,6 +24,16 @@ interface BackupData {
   activeTemplateId: string
 }
 
+function createTemplateRecord(name: string, html: string): Template {
+  return {
+    id: `user-${Date.now()}`,
+    name,
+    html,
+    isBuiltin: false,
+    uploadedAt: new Date().toISOString(),
+  }
+}
+
 // ─── Dark mode hook ───────────────────────────────────────────────────────────
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
@@ -68,7 +78,11 @@ export function Dashboard() {
       setUserList(saved || [])
       const defaultT = builtins[0]
       if (!id && defaultT) {
-        doActivate(defaultT)
+        await Promise.all([
+          activeTemplateId.setValue(defaultT.id),
+          activeTemplateHtml.setValue(defaultT.html),
+        ])
+        setActiveId(defaultT.id)
       } else {
         setActiveId(id || '')
       }
@@ -119,13 +133,7 @@ export function Dashboard() {
   }
 
   async function doDuplicate(template: Template) {
-    const newTemplate: Template = {
-      ...template,
-      id: `user-${Date.now()}`,
-      name: `${template.name} (Copy)`,
-      isBuiltin: false,
-      uploadedAt: new Date().toISOString(),
-    }
+    const newTemplate = createTemplateRecord(`${template.name} (Copy)`, template.html)
     const updated = [...userList, newTemplate]
     await userTemplates.setValue(updated)
     setUserList(updated)
@@ -160,14 +168,7 @@ export function Dashboard() {
   }
 
   async function handleCreateBlank() {
-    const newTemplate: Template = {
-      id: `user-${Date.now()}`,
-      name: 'Untitled Template',
-      html: STARTER_HTML,
-      isBuiltin: false,
-      uploadedAt: new Date().toISOString(),
-    }
-
+    const newTemplate = createTemplateRecord('Untitled Template', STARTER_HTML)
     setEditingTemplate(newTemplate)
     setEditorValue(STARTER_HTML)
   }
@@ -192,14 +193,7 @@ export function Dashboard() {
         }
 
         const sanitized = sanitizeHtml(raw)
-
-        const newTemplate: Template = {
-          id: `user-${Date.now()}`,
-          name: file.name.replace(/\.html$/i, ''),
-          html: sanitized,
-          isBuiltin: false,
-          uploadedAt: new Date().toISOString(),
-        }
+        const newTemplate = createTemplateRecord(file.name.replace(/\.html$/i, ''), sanitized)
 
         const updated = [...userList, newTemplate]
         await userTemplates.setValue(updated)
@@ -343,17 +337,17 @@ export function Dashboard() {
     )
   }
 
-  // ─── Main Dynamic Layout (Blog-Style) ─────────────────────────────────────────
+  // ─── Main Dynamic Layout ────────────────────────────────────────────────────
   return (
     <div className={cn("min-h-screen bg-background text-foreground font-sans flex flex-col", dark && "dark")}>
       <input type="file" ref={fileRef} className="hidden" accept=".html" onChange={handleFile} />
       <input type="file" ref={backupRef} data-testid="input-backup" className="hidden" accept=".json" onChange={handleImport} />
 
       {/* Top Masthead */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-xs">
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           {/* Brand */}
-          <div className="flex items-center gap-2.5 shrink-0 z-10">
+          <div className="flex items-center gap-2.5 shrink-0">
             <div className="bg-primary text-primary-foreground p-1.5 rounded-lg shadow-xs">
               <img src="/icon/128.png" className="w-4 h-4 brightness-0 invert dark:invert-0" alt="WYNTab" />
             </div>
@@ -363,8 +357,8 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Nav Tabs (Dead centered on desktop) */}
-          <nav className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 flex items-center gap-1 overflow-x-auto" aria-label="Views">
+          {/* Nav Tabs */}
+          <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Views">
             <button 
               type="button"
               data-testid="tab-built-in"
@@ -401,7 +395,7 @@ export function Dashboard() {
           </nav>
 
           {/* Theme Toggle */}
-          <div className="flex items-center shrink-0 z-10">
+          <div className="flex items-center shrink-0">
             <button 
               type="button"
               onClick={() => setDark(!dark)} 
@@ -465,9 +459,7 @@ export function Dashboard() {
                 onActivate={() => doActivate(t)}
                 onDuplicate={() => doDuplicate(t)}
                 onPreview={() => setPreviewTemplate(t)}
-                onEditCode={() => {
-                  doDuplicate(t).then(() => showStatus('Duplicated for editing.', true))
-                }}
+                onEditCode={() => {}}
               />
             ))}
           </div>
@@ -596,14 +588,9 @@ export function Dashboard() {
         )}
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 text-center text-xs text-muted-foreground border-t border-border mt-auto">
-        WYNTab • Write Your NewTab • Local Storage
-      </footer>
-
       {/* Large Preview Modal */}
       {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-background/80 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-background/80">
           <div className="w-full max-w-3xl h-[75vh] max-h-[580px] bg-card border border-border rounded-lg flex flex-col overflow-hidden shadow-2xl">
             <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-2">
@@ -645,7 +632,7 @@ export function Dashboard() {
       {status && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           <div className={cn(
-            'rounded-lg border px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-sm whitespace-nowrap flex items-center gap-2', 
+            'rounded-lg border px-4 py-2 text-xs font-medium shadow-lg whitespace-nowrap flex items-center gap-2', 
             status.ok ? 'border-border bg-card text-foreground' : 'border-destructive/40 bg-destructive/10 text-destructive'
           )}>
             {status.ok ? <CheckCircle2 size={14} className="text-green-600 dark:text-green-400" /> : <X size={14} />}

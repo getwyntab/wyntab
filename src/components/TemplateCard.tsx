@@ -13,9 +13,8 @@ function Preview({ html }: { html?: string }) {
     )
   }
 
-  // ponytail: static thumbnail needs no JS execution or form submission
-  const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, '')
-  const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${stripped}`
+  // ponytail: static thumbnail in sandboxed iframe needs no script execution
+  const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${html}`
 
   return (
     <div className="relative aspect-video w-full overflow-hidden bg-muted/20 border-b border-border">
@@ -92,15 +91,11 @@ export function TemplateCard({
             onPreview()
           }
         }}
-        className="relative cursor-pointer group select-none"
+        className="relative cursor-pointer select-none"
         title={`Preview ${template.name} full screen`}
         aria-label={`Preview ${template.name} full screen`}
       >
         <Preview html={template.html} />
-        {/* Subtle hover badge */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity bg-background/95 text-foreground text-xs font-medium px-2 py-0.5 rounded-md border border-border shadow-xs pointer-events-none">
-          Click to Preview
-        </div>
       </div>
 
       {/* Card Info & Primary Trigger */}
@@ -187,6 +182,14 @@ export function TemplateCard({
 
         {/* Minimal Plain Text Actions */}
         <div className="pt-2 border-t border-border flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+          <button
+            type="button"
+            onClick={onPreview}
+            className="hover:text-foreground transition-colors cursor-pointer"
+          >
+            Preview
+          </button>
+          <span>•</span>
           {template.isBuiltin ? (
             <button
               type="button"
@@ -231,4 +234,3 @@ export function TemplateCard({
     </div>
   )
 }
-

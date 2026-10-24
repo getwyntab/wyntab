@@ -16,7 +16,7 @@ export function Sidebar({
   onSelectNav,
   darkMode,
   onToggleTheme,
-  version = '0.5.0',
+  version = '0.5.1',
 }: SidebarProps) {
   return (
     <aside className="w-60 h-screen shrink-0 bg-bg-b1 border-r border-divider-dim flex flex-col justify-between select-none">

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { getBuiltinTemplates, type Template } from '@/lib/templates'
 import { activeTemplateHtml, activeTemplateId, userTemplates } from '@/lib/storage'
-import { sanitizeHtml } from '@/lib/sanitize'
 import { STARTER_HTML } from '@/lib/constants'
 
 // Modular Components
@@ -180,16 +179,15 @@ export function Dashboard() {
   async function handleSaveEditor(name: string, html: string) {
     if (!editingTemplate) return
 
-    const sanitized = sanitizeHtml(html)
     const exists = userList.some((t) => t.id === editingTemplate.id)
 
     let updated: Template[]
     if (exists) {
       updated = userList.map((t) =>
-        t.id === editingTemplate.id ? { ...t, name, html: sanitized } : t
+        t.id === editingTemplate.id ? { ...t, name, html } : t
       )
     } else {
-      updated = [...userList, { ...editingTemplate, name, html: sanitized }]
+      updated = [...userList, { ...editingTemplate, name, html }]
     }
 
     await userTemplates.setValue(updated)
@@ -197,11 +195,11 @@ export function Dashboard() {
 
     // Update live active newtab if editing currently active template
     if (activeId === editingTemplate.id) {
-      await activeTemplateHtml.setValue(sanitized)
+      await activeTemplateHtml.setValue(html)
     }
 
     setIsNewDraft(false)
-    setEditingTemplate((prev) => (prev ? { ...prev, name, html: sanitized } : null))
+    setEditingTemplate((prev) => (prev ? { ...prev, name, html } : null))
     showToast('Changes saved.', true)
   }
 
@@ -231,8 +229,7 @@ export function Dashboard() {
           return
         }
 
-        const sanitized = sanitizeHtml(raw)
-        const newTemplate = createTemplateRecord(file.name.replace(/\.html$/i, ''), sanitized)
+        const newTemplate = createTemplateRecord(file.name.replace(/\.html$/i, ''), raw)
 
         const updated = [...userList, newTemplate]
         await userTemplates.setValue(updated)
@@ -278,14 +275,14 @@ export function Dashboard() {
           throw new Error('Invalid backup format')
         }
 
-        const sanitized = data.userTemplates.map((t) => ({
+        const restored = data.userTemplates.map((t) => ({
           ...t,
-          html: sanitizeHtml(t.html || ''),
+          html: t.html || '',
         }))
 
-        await userTemplates.setValue(sanitized)
+        await userTemplates.setValue(restored)
         if (data.activeTemplateId) {
-          const all = [...builtins, ...sanitized]
+          const all = [...builtins, ...restored]
           const active = all.find((t) => t.id === data.activeTemplateId)
           if (active) {
             await doActivate(active)
@@ -303,7 +300,7 @@ export function Dashboard() {
 
   const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
     ? browser.runtime.getManifest().version
-    : '0.5.1'
+    : '0.5.2'
 
   // ─── VIEW 4: Full-Screen Template Editor ────────────────────────────────────
   if (editingTemplate) {

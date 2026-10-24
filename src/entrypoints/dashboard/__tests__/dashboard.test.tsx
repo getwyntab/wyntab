@@ -65,7 +65,7 @@ describe('Dashboard entrypoint', () => {
     expect(screen.getByText(/security & sandbox policy/i)).toBeInTheDocument()
   })
 
-  it('sanitizes malicious script and iframe tags when importing backup JSON in Settings', async () => {
+  it('preserves template scripts and markup for isolated sandbox execution when importing backup JSON in Settings', async () => {
     render(<Dashboard />)
 
     // Go to settings
@@ -97,8 +97,8 @@ describe('Dashboard entrypoint', () => {
       const saved = await userTemplates.getValue()
       const imported = saved?.find((t) => t.id === 'imported-xss')
       expect(imported).toBeDefined()
-      expect(imported?.html).not.toContain('<script>')
-      expect(imported?.html).not.toContain('<iframe>')
+      expect(imported?.html).toContain('<script>alert("xss")</script>')
+      expect(imported?.html).toContain('<iframe src="evil.com"></iframe>')
       expect(imported?.html).toContain('<h1>Title</h1>')
     })
   })

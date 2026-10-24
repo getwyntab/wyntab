@@ -57,6 +57,50 @@ export function TemplateEditor({
     return () => clearTimeout(timer)
   }, [code])
 
+  const previewIframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Reload sandbox runner when code debounces or restarts
+  useEffect(() => {
+    const iframe = previewIframeRef.current
+    if (!iframe) return
+    const handleLoad = () => {
+      iframe.contentWindow?.postMessage({ type: 'RUN', html: debouncedHtml }, '*')
+    }
+    iframe.addEventListener('load', handleLoad, { once: true })
+    const sandboxUrl = typeof browser !== 'undefined' && browser.runtime?.getURL
+      ? browser.runtime.getURL('/sandbox.html')
+      : '/sandbox.html'
+    iframe.src = sandboxUrl
+  }, [debouncedHtml, previewKey])
+
+  // wyn storage bridge in editor preview
+  useEffect(() => {
+    const handleMessage = async (e: MessageEvent) => {
+      const iframe = previewIframeRef.current
+      if (!iframe || e.source !== iframe.contentWindow || !e.data?.wyn) return
+      const { id, op, key, value } = e.data
+      const k = `tpl:preview:${template.id}:${key}`
+      let result: any
+      try {
+        if (typeof browser !== 'undefined' && browser.storage?.local) {
+          if (op === 'set') {
+            await browser.storage.local.set({ [k]: value })
+          } else if (op === 'remove') {
+            await browser.storage.local.remove(k)
+          } else {
+            const stored = await browser.storage.local.get(k)
+            result = stored[k]
+          }
+        }
+      } catch (err: any) {
+        result = { error: err?.message || String(err) }
+      }
+      iframe.contentWindow?.postMessage({ id, result }, '*')
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [template.id])
+
   // Attach window beforeunload guard when dirty
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
@@ -220,12 +264,12 @@ export function TemplateEditor({
           <div className="h-8 px-3 bg-bg-a3 border-b border-divider-dim flex items-center justify-between shrink-0 select-none">
             <span className="text-[12px] font-mono text-text-secondary">index.html</span>
             <div ref={jsInfoRef} className="flex items-center gap-1.5 group relative">
-              <span className="text-[12px] text-text-subtle font-mono">HTML & CSS</span>
+              <span className="text-[12px] text-accent-bright font-mono">JS Sandbox</span>
               <button
                 type="button"
                 onClick={() => setShowJsInfo((prev) => !prev)}
                 className="flex items-center text-text-muted hover:text-text-primary transition-colors cursor-pointer select-none focus:outline-none"
-                aria-label="Why JavaScript is disabled"
+                aria-label="About JavaScript Sandbox"
               >
                 <svg
                   width={14}
@@ -250,14 +294,14 @@ export function TemplateEditor({
               >
                 <div className="flex items-center gap-1.5 text-accent-bright font-semibold text-[12px] mb-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-bright" />
-                  <span>Why JavaScript is disabled</span>
+                  <span>JavaScript & ESM Enabled</span>
                 </div>
                 <p className="text-[12px] leading-relaxed text-text-secondary mb-2.5">
-                  Chrome extension security sandbox restricts arbitrary <code className="px-1 py-0.5 rounded bg-bg-a3 font-mono text-text-primary text-[12px]">&lt;script&gt;</code> tags and inline event handlers to safeguard browser credentials and prevent cross-site scripting (XSS).
+                  Code executes inside Chrome's isolated sandbox. React, Vue, Preact, Tailwind, and ESM packages from esm.sh are loaded dynamically with zero boilerplate.
                 </p>
                 <div className="pt-2 border-t border-divider-dim flex items-center justify-between text-[12px] text-text-muted">
                   <span>Supported</span>
-                  <span className="font-mono text-text-primary font-medium">HTML5 + CSS3 Animations</span>
+                  <span className="font-mono text-text-primary font-medium">React, Vue, ESM, Tailwind</span>
                 </div>
               </div>
             </div>
@@ -331,14 +375,13 @@ export function TemplateEditor({
           {/* Sandboxed Iframe (pointer-events disabled during resize drag) */}
           <div className="flex-1 w-full h-full bg-bg-b2 overflow-hidden relative">
             <iframe
-              key={previewKey}
-              srcDoc={debouncedHtml}
+              ref={previewIframeRef}
               className={cn(
                 "w-full h-full border-none bg-black",
                 isDragging && "pointer-events-none"
               )}
               title="Live Template Preview"
-              sandbox="allow-scripts allow-forms allow-same-origin"
+              sandbox="allow-scripts allow-forms allow-popups allow-modals"
             />
           </div>
         </div>

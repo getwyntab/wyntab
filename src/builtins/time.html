@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time - WYNTab</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 50%, #151926 0%, #07090e 100%);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.25rem;
+      padding: 2.5rem 3.5rem;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+    }
+    .container:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .clock-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .time-digits {
+      font-size: clamp(4rem, 14vw, 9.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      background: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .seconds-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
+    }
+    .seconds {
+      font-size: clamp(1.5rem, 4vw, 2.75rem);
+      font-weight: 700;
+      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      line-height: 1;
+    }
+    .ampm {
+      font-size: clamp(0.85rem, 1.8vw, 1.25rem);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    .date {
+      font-size: clamp(0.95rem, 2vw, 1.35rem);
+      font-weight: 500;
+      color: #94a3b8;
+      letter-spacing: 0.02em;
+    }
+    .hint {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #475569;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.05em;
+    }
+    .progress-bar-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="clock-card" title="Click to toggle 12h / 24h format">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span id="badge-text">JS Active</span>
+    </div>
+
+    <div class="clock-row">
+      <div class="time-digits" id="time">00:00</div>
+      <div class="seconds-wrapper">
+        <span class="seconds" id="seconds">00</span>
+        <span class="ampm" id="ampm"></span>
+      </div>
+    </div>
+
+    <div class="date" id="date">Loading date...</div>
+    <div class="hint" id="format-hint">Click to switch to 12h</div>
+  </div>
+
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <script>
+    let is12h = false;
+    let ticks = 0;
+
+    // Load persisted format from extension bridge
+    if (window.wyn) {
+      window.wyn.get('clock_12h').then((saved) => {
+        if (typeof saved === 'boolean') {
+          is12h = saved;
+          updateClock();
+        }
+      });
+    }
+
+    function toggleFormat() {
+      is12h = !is12h;
+      if (window.wyn) {
+        window.wyn.set('clock_12h', is12h);
+      }
+      updateClock();
+    }
+
+    document.getElementById('clock-card').addEventListener('click', toggleFormat);
+
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const millis = now.getMilliseconds();
+
+      let ampmText = '';
+      if (is12h) {
+        ampmText = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+      }
+      const hoursStr = String(hours).padStart(2, '0');
+
+      document.getElementById('time').textContent = hoursStr + ':' + minutes;
+      document.getElementById('seconds').textContent = seconds;
+      document.getElementById('ampm').textContent = ampmText;
+
+      // Update date
+      const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+      document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
+
+      // Hint update
+      document.getElementById('format-hint').textContent = is12h
+        ? 'Click to switch to 24h'
+        : 'Click to switch to 12h';
+
+      // Update seconds progress bar (0 - 100%)
+      const secProgress = ((now.getSeconds() + millis / 1000) / 60) * 100;
+      document.getElementById('progress').style.width = secProgress + '%';
+
+      ticks++;
+      if (ticks % 10 === 0) {
+        document.getElementById('badge-text').textContent = 'JS Active • Tick ' + Math.floor(ticks / 10);
+      }
+    }
+
+    // High frequency update for ultra-smooth live response
+    setInterval(updateClock, 100);
+    updateClock();
+  </script>
+</body>
+</html>
+

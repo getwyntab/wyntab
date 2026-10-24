@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script>
+const CDN = 'https://esm.sh/';
+const BASE = {
+  'react': CDN + 'react@18', 'react/': CDN + 'react@18/',
+  'react-dom': CDN + 'react-dom@18', 'react-dom/': CDN + 'react-dom@18/',
+  'vue': CDN + 'vue@3', 'preact': CDN + 'preact@10', 'preact/': CDN + 'preact@10/',
+};
+
+// runs inside the user's document
+const bridge = () => {
+  let id = 0; const pending = {};
+  addEventListener('message', (e) => {
+    if (e.source !== parent) return;
+    pending[e.data?.id]?.(e.data.result);
+    delete pending[e.data?.id];
+  });
+  const call = (op, key, value) => new Promise((r) => {
+    pending[++id] = r;
+    parent.postMessage({ wyn: true, id, op, key, value }, '*');
+  });
+  window.wyn = {
+    get: (k) => call('get', k),
+    set: (k, v) => call('set', k, v),
+    remove: (k) => call('remove', k),
+  };
+};
+
+addEventListener('message', (e) => {
+  if (e.source !== parent || e.data?.type !== 'RUN') return;
+  let html = e.data.html;
+  if (typeof html !== 'string') return;
+  const map = { ...BASE };
+
+  // merge user's own importmap
+  html = html.replace(/<script[^>]*type=["']importmap["'][^>]*>([\s\S]*?)<\/script>/i, (_, json) => {
+    try { Object.assign(map, JSON.parse(json).imports); } catch {}
+    return '';
+  });
+
+  // auto-map any bare import to esm.sh, sharing the page's React
+  for (const m of html.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)) {
+    const s = m[1];
+    const known = s in map || Object.keys(map).some((k) => k.endsWith('/') && s.startsWith(k));
+    if (known || /^(\.|\/|[a-z]+:)/i.test(s)) continue;
+    map[s] = CDN + s + '?external=react,react-dom';
+  }
+
+  const head =
+    `<script>(${bridge})()<\/script>` +
+    `<script type="importmap">${JSON.stringify({ imports: map })}<\/script>` +
+    (/text\/babel/.test(html)
+      ? `<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"><\/script>` : '');
+
+  if (/<head[^>]*>/i.test(html)) {
+    html = html.replace(/<head[^>]*>/i, (m) => m + head);
+  } else if (/<html[^>]*>/i.test(html)) {
+    html = html.replace(/<html[^>]*>/i, (m) => m + '<head>' + head + '</head>');
+  } else {
+    html = '<!DOCTYPE html><head>' + head + '</head><body>' + html + '</body>';
+  }
+
+  document.open(); document.write(html); document.close();
+});
+</script>
+

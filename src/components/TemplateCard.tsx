@@ -1,23 +1,21 @@
-import { useState } from 'react'
-import { Check, X, Pencil, CheckCircle2 } from 'lucide-react'
+import { Code2, Copy, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type Template } from '@/lib/templates'
 
 // ─── Thumbnail Preview ─────────────────────────────────────────────────────────
-function Preview({ html }: { html?: string }) {
+function Thumbnail({ html }: { html?: string }) {
   if (!html) {
     return (
-      <div className="flex h-full w-full items-center justify-center text-muted-foreground text-xs font-medium">
+      <div className="flex h-full w-full items-center justify-center text-text-muted text-[12px]">
         No Preview
       </div>
     )
   }
 
-  // ponytail: static thumbnail in sandboxed iframe needs no script execution
   const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${html}`
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-muted/20 border-b border-border">
+    <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-b2 border-b border-divider-dim">
       <iframe
         srcDoc={styledHtml}
         scrolling="no"
@@ -31,7 +29,7 @@ function Preview({ html }: { html?: string }) {
           transformOrigin: '0 0',
         }}
         className="absolute inset-0 pointer-events-none border-none select-none"
-        title="Preview thumbnail"
+        title="Template preview thumbnail"
         sandbox=""
       />
     </div>
@@ -43,191 +41,130 @@ interface TemplateCardProps {
   template: Template
   isActive: boolean
   onActivate: () => void
-  onDelete?: () => void
-  onRename?: (newName: string) => void
+  onDeactivate: () => void
   onDuplicate: () => void
   onEditCode: () => void
-  onPreview: () => void
+  onDelete?: () => void
 }
 
 export function TemplateCard({
   template,
   isActive,
   onActivate,
-  onDelete,
-  onRename,
+  onDeactivate,
   onDuplicate,
   onEditCode,
-  onPreview,
+  onDelete,
 }: TemplateCardProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editName, setEditName] = useState(template.name)
-
-  const handleRename = () => {
-    if (editName.trim() && editName !== template.name && onRename) {
-      onRename(editName.trim())
+  const handleToggle = () => {
+    if (isActive) {
+      onDeactivate()
+    } else {
+      onActivate()
     }
-    setIsEditing(false)
   }
 
   return (
     <div
       data-testid={`template-card-${template.id}`}
       className={cn(
-        "bg-card border rounded-lg flex flex-col justify-between overflow-hidden transition-colors duration-150 shadow-xs w-full h-full",
+        "bg-bg-a1 border rounded-md flex flex-col justify-between overflow-hidden transition-all duration-150 w-full shadow-xs",
         isActive
-          ? "border-primary"
-          : "border-border hover:border-muted-foreground/50"
+          ? "border-accent-main ring-1 ring-accent-main/30"
+          : "border-divider-dim hover:border-divider-bright"
       )}
     >
-      {/* Clickable Preview Area (Click to preview full screen) */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={onPreview}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onPreview()
-          }
-        }}
-        className="relative cursor-pointer select-none"
-        title={`Preview ${template.name} full screen`}
-        aria-label={`Preview ${template.name} full screen`}
-      >
-        <Preview html={template.html} />
+      {/* 16:10 Visual Display Thumbnail (Non-interactive display only) */}
+      <div className="select-none pointer-events-none">
+        <Thumbnail html={template.html} />
       </div>
 
-      {/* Card Info & Primary Trigger */}
-      <div className="p-3.5 flex flex-col gap-3 flex-1 justify-between">
-        <div className="flex items-start justify-between gap-3">
-          {/* Title and Badge */}
-          <div className="min-w-0 flex-1">
-            {isEditing ? (
-              <div className="flex items-center gap-1.5">
-                <input
-                  autoFocus
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleRename()
-                    if (e.key === 'Escape') {
-                      setIsEditing(false)
-                      setEditName(template.name)
-                    }
-                  }}
-                  className="w-full bg-muted border border-border focus:border-primary rounded-md px-2 py-1 text-xs font-medium outline-none text-foreground"
-                  aria-label="Rename template"
-                />
-                <button
-                  type="button"
-                  onClick={handleRename}
-                  className="p-1 text-foreground hover:text-primary transition-colors"
-                  title="Save name"
-                >
-                  <Check size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                  title="Cancel"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-sm font-semibold text-foreground truncate" title={template.name}>
-                  {template.name}
-                </h3>
-                {!template.isBuiltin && onRename && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditName(template.name)
-                      setIsEditing(true)
-                    }}
-                    className="p-1 text-muted-foreground hover:text-foreground rounded transition-colors shrink-0"
-                    title="Rename template"
-                    aria-label="Rename"
-                  >
-                    <Pencil size={12} />
-                  </button>
-                )}
-              </div>
-            )}
-            <span className="text-xs text-muted-foreground block mt-0.5">
-              {template.isBuiltin ? 'Built-in template' : 'Custom template'}
-            </span>
-          </div>
+      {/* Title & Metadata Row */}
+      <div className="p-3 pb-2 flex items-center justify-between gap-2">
+        <h3
+          className="text-[13px] font-semibold text-text-primary truncate"
+          title={template.name}
+        >
+          {template.name}
+        </h3>
+        <span
+          className={cn(
+            "text-[10px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wider shrink-0",
+            template.isBuiltin
+              ? "bg-bg-a3 text-text-muted border border-divider-dim"
+              : "bg-bg-accent-dark text-accent-bright border border-accent-dim/40"
+          )}
+        >
+          {template.isBuiltin ? 'Built-in' : 'Custom'}
+        </span>
+      </div>
 
-          {/* Primary Action (Unified geometry: h-7 px-3 rounded-lg text-xs) */}
-          <div className="shrink-0">
-            {isActive ? (
-              <span className="inline-flex items-center justify-center gap-1.5 h-7 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold select-none shadow-xs">
-                <CheckCircle2 size={13} /> Active
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={onActivate}
-                className="inline-flex items-center justify-center h-7 px-3 rounded-lg border border-border bg-background hover:bg-muted text-foreground text-xs font-medium transition-colors cursor-pointer shadow-xs"
-              >
-                Activate
-              </button>
+      {/* Violentmonkey Action Bar */}
+      <div className="px-3 py-2 border-t border-divider-dim flex items-center justify-between bg-bg-a2/40">
+        {/* Left: Activation Toggle Switch */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isActive}
+          onClick={handleToggle}
+          className="flex items-center gap-2 group cursor-pointer focus:outline-none"
+          title={isActive ? "Active Tab (Click to untoggle and revert to default)" : "Click to activate"}
+        >
+          <div
+            className={cn(
+              "w-8 h-4.5 rounded-full transition-colors relative flex items-center p-0.5",
+              isActive ? "bg-accent-main" : "bg-bg-a4 border border-divider-bright"
             )}
+          >
+            <div
+              className={cn(
+                "w-3.5 h-3.5 rounded-full transition-transform duration-150",
+                isActive
+                  ? "translate-x-3.5 bg-text-on-accent"
+                  : "translate-x-0 bg-text-muted"
+              )}
+            />
           </div>
-        </div>
+          <span className={cn(
+            "text-[11px] font-medium leading-none",
+            isActive ? "text-accent-bright font-semibold" : "text-text-muted"
+          )}>
+            {isActive ? "Active" : "Activate"}
+          </span>
+        </button>
 
-        {/* Minimal Plain Text Actions */}
-        <div className="pt-2 border-t border-border flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+        {/* Right: Violentmonkey Icon Actions (< / >, Copy, Trash) */}
+        <div className="flex items-center gap-1 text-text-muted">
           <button
             type="button"
-            onClick={onPreview}
-            className="hover:text-foreground transition-colors cursor-pointer"
+            onClick={onEditCode}
+            className="h-7 w-7 rounded flex items-center justify-center hover:text-text-primary hover:bg-bg-a4 transition-colors"
+            title={template.isBuiltin ? "Fork to edit" : "Edit code"}
+            aria-label={template.isBuiltin ? "Fork to edit" : "Edit code"}
           >
-            Preview
+            <Code2 size={14} />
           </button>
-          <span>•</span>
-          {template.isBuiltin ? (
+
+          <button
+            type="button"
+            onClick={onDuplicate}
+            className="h-7 w-7 rounded flex items-center justify-center hover:text-text-primary hover:bg-bg-a4 transition-colors"
+            title="Duplicate template"
+            aria-label="Duplicate template"
+          >
+            <Copy size={13} />
+          </button>
+
+          {!template.isBuiltin && onDelete && (
             <button
               type="button"
-              onClick={onDuplicate}
-              className="hover:text-foreground transition-colors cursor-pointer"
+              onClick={onDelete}
+              className="h-7 w-7 rounded flex items-center justify-center text-text-muted hover:text-danger-main hover:bg-danger-bg transition-colors"
+              title="Delete template"
+              aria-label="Delete template"
             >
-              Duplicate to customize
+              <Trash2 size={13} />
             </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={onEditCode}
-                className="hover:text-foreground transition-colors cursor-pointer font-medium"
-              >
-                Edit HTML
-              </button>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={onDuplicate}
-                className="hover:text-foreground transition-colors cursor-pointer"
-              >
-                Duplicate
-              </button>
-              {onDelete && (
-                <>
-                  <span>•</span>
-                  <button
-                    type="button"
-                    onClick={onDelete}
-                    className="text-destructive/80 hover:text-destructive transition-colors cursor-pointer"
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </>
           )}
         </div>
       </div>

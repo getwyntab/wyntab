@@ -1,22 +1,21 @@
 import { createRoot } from 'react-dom/client'
-import { useEffect, useRef, useState, lazy, Suspense } from 'react'
-import {
-  Moon, Sun,
-  CheckCircle2, Download, FileUp, X,
-  Code2, Save, ArrowLeft, Plus,
-  ShieldCheck, Info, Monitor, Eye
-} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { getBuiltinTemplates, type Template } from '@/lib/templates'
 import { activeTemplateHtml, activeTemplateId, userTemplates } from '@/lib/storage'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { TemplateCard } from '@/components/TemplateCard'
 import { STARTER_HTML } from '@/lib/constants'
 
-const Editor = lazy(() => import('@/components/Editor'))
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-type Tab = 'built-in' | 'custom' | 'settings'
+// Modular Components
+import { Sidebar, type DashboardNav } from './components/Sidebar'
+import { TemplatesToolbar, type TemplateFilter, type TemplateSort } from './components/TemplatesToolbar'
+import { TemplateCard } from '@/components/TemplateCard'
+import { TemplateEditor } from './components/TemplateEditor'
+import { SettingsPage } from './components/SettingsPage'
+import { AboutPage } from './components/AboutPage'
+import { DeleteConfirmModal } from './components/DeleteConfirmModal'
+import { UnsavedModal } from './components/UnsavedModal'
+import { Toast, type ToastMessage } from './components/Toast'
 
 interface BackupData {
   version: number
@@ -34,35 +33,44 @@ function createTemplateRecord(name: string, html: string): Template {
   }
 }
 
-// ─── Dark mode hook ───────────────────────────────────────────────────────────
+// ─── Dark Mode Hook ───────────────────────────────────────────────────────────
 function useDarkMode() {
   const [dark, setDark] = useState(() => {
-    return document.documentElement.classList.contains('dark')
+    return document.documentElement.classList.contains('dark') ||
+      document.documentElement.getAttribute('data-theme') === 'dark' ||
+      localStorage.getItem('wyn-dashboard-theme') === 'dark'
   })
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
     localStorage.setItem('wyn-dashboard-theme', dark ? 'dark' : 'light')
   }, [dark])
 
   return [dark, setDark] as const
 }
 
-// ─── Dashboard Component ──────────────────────────────────────────────────────
+// ─── Dashboard Workstation Component ──────────────────────────────────────────
 export function Dashboard() {
   const [dark, setDark] = useDarkMode()
+  const [activeNav, setActiveNav] = useState<DashboardNav>('templates')
   const [activeId, setActiveId] = useState('')
   const [userList, setUserList] = useState<Template[]>([])
-  const [status, setStatus] = useState<{ msg: string; ok: boolean } | null>(null)
-  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
-  const [editorValue, setEditorValue] = useState('')
-  const [activeTab, setActiveTab] = useState<Tab>('built-in')
-  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
-  
-  const fileRef = useRef<HTMLInputElement>(null)
-  const backupRef = useRef<HTMLInputElement>(null)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Filter & Sort
+  const [filter, setFilter] = useState<TemplateFilter>('all')
+  const [sort, setSort] = useState<TemplateSort>('name-asc')
+
+  // Modals & Navigation Guards
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
+  const [isNewDraft, setIsNewDraft] = useState(false)
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false)
+  const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null)
+
+  // Toasts
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const builtins = getBuiltinTemplates()
 
   useEffect(() => {
@@ -87,34 +95,63 @@ export function Dashboard() {
         setActiveId(id || '')
       }
     } catch {
-      // Fallback for non-extension environments
+      // Fallback for non-extension / mock environments
     }
   }
 
-  function showStatus(msg: string, ok: boolean) {
-    setStatus({ msg, ok })
-    if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => setStatus(null), 3000)
+  function showToast(msg: string, ok = true) {
+    const id = `toast-${Date.now()}-${Math.random()}`
+    setToasts((prev) => [...prev, { id, msg, ok }])
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, 3000)
   }
 
+  function dismissToast(id: string) {
+    setToasts((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  // ─── Activation Controls ────────────────────────────────────────────────────
   async function doActivate(template: Template) {
     await Promise.all([
       activeTemplateId.setValue(template.id),
       activeTemplateHtml.setValue(template.html),
     ])
     setActiveId(template.id)
-    showStatus(`"${template.name}" activated.`, true)
+    showToast(`"${template.name}" activated.`, true)
   }
 
-  async function doDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this template?')) return
+  async function doDeactivate(template: Template) {
+    const defaultT = builtins[0]
+    if (defaultT) {
+      await doActivate(defaultT)
+      showToast(`"${template.name}" untoggled. Reverted to "${defaultT.name}".`, true)
+    }
+  }
+
+  // ─── Template Actions ───────────────────────────────────────────────────────
+  async function doDuplicate(template: Template) {
+    const copy = createTemplateRecord(`${template.name} (Copy)`, template.html)
+    const updated = [...userList, copy]
+    await userTemplates.setValue(updated)
+    setUserList(updated)
+    showToast(`Duplicated "${template.name}".`, true)
+  }
+
+  async function doConfirmDelete() {
+    if (!deletingTemplate) return
+
+    const id = deletingTemplate.id
     const updated = userList.filter((t) => t.id !== id)
     await userTemplates.setValue(updated)
     setUserList(updated)
+
+    // Active Fallback Safeguard
     if (activeId === id) {
       const defaultT = builtins[0]
-      if (defaultT) doActivate(defaultT)
-      else {
+      if (defaultT) {
+        await doActivate(defaultT)
+      } else {
         await Promise.all([
           activeTemplateId.setValue(''),
           activeTemplateHtml.setValue(''),
@@ -122,63 +159,70 @@ export function Dashboard() {
         setActiveId('')
       }
     }
-    showStatus('Template deleted.', true)
+
+    setDeletingTemplate(null)
+    showToast(`"${deletingTemplate.name}" deleted.`, true)
   }
 
-  async function doRename(id: string, newName: string) {
-    const updated = userList.map(t => t.id === id ? { ...t, name: newName } : t)
-    await userTemplates.setValue(updated)
-    setUserList(updated)
-    showStatus('Template renamed.', true)
+  // ─── Editor Actions ─────────────────────────────────────────────────────────
+  function handleNewTemplate() {
+    const draft = createTemplateRecord('Untitled Template', STARTER_HTML)
+    setEditingTemplate(draft)
+    setIsNewDraft(true)
   }
 
-  async function doDuplicate(template: Template) {
-    const newTemplate = createTemplateRecord(`${template.name} (Copy)`, template.html)
-    const updated = [...userList, newTemplate]
-    await userTemplates.setValue(updated)
-    setUserList(updated)
-    showStatus(`Duplicated "${template.name}".`, true)
+  function handleForkBuiltin(builtin: Template) {
+    const forkDraft = createTemplateRecord(`${builtin.name} (Custom)`, builtin.html)
+    setEditingTemplate(forkDraft)
+    setIsNewDraft(true)
   }
 
-  async function doSaveCode() {
+  async function handleSaveEditor(name: string, html: string) {
     if (!editingTemplate) return
-    
-    const sanitized = sanitizeHtml(editorValue)
-    const exists = userList.some(t => t.id === editingTemplate.id)
-    
+
+    const sanitized = sanitizeHtml(html)
+    const exists = userList.some((t) => t.id === editingTemplate.id)
+
     let updated: Template[]
     if (exists) {
-      updated = userList.map(t => 
-        t.id === editingTemplate.id ? { ...t, html: sanitized } : t
+      updated = userList.map((t) =>
+        t.id === editingTemplate.id ? { ...t, name, html: sanitized } : t
       )
     } else {
-      updated = [...userList, { ...editingTemplate, html: sanitized }]
+      updated = [...userList, { ...editingTemplate, name, html: sanitized }]
     }
-    
+
     await userTemplates.setValue(updated)
     setUserList(updated)
-    
+
+    // Update live active newtab if editing currently active template
     if (activeId === editingTemplate.id) {
       await activeTemplateHtml.setValue(sanitized)
     }
-    
-    setActiveTab('custom')
+
+    setIsNewDraft(false)
+    setEditingTemplate((prev) => (prev ? { ...prev, name, html: sanitized } : null))
+    showToast('Changes saved.', true)
+  }
+
+  async function handleSetActiveFromEditor() {
+    if (!editingTemplate) return
+    await doActivate(editingTemplate)
+  }
+
+  function handleBackToLibrary() {
     setEditingTemplate(null)
-    showStatus('Changes saved.', true)
+    setIsNewDraft(false)
+    setShowUnsavedModal(false)
   }
 
-  async function handleCreateBlank() {
-    const newTemplate = createTemplateRecord('Untitled Template', STARTER_HTML)
-    setEditingTemplate(newTemplate)
-    setEditorValue(STARTER_HTML)
-  }
-
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  // ─── File Upload & Import ───────────────────────────────────────────────────
+  function handleUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
     if (!file.name.toLowerCase().endsWith('.html')) {
-      showStatus('Please upload a .html file.', false)
+      showToast('Please upload a .html file.', false)
       e.target.value = ''
       return
     }
@@ -188,7 +232,7 @@ export function Dashboard() {
       try {
         const raw = ev.target?.result as string
         if (!raw) {
-          showStatus('File is empty.', false)
+          showToast('File is empty.', false)
           return
         }
 
@@ -199,23 +243,16 @@ export function Dashboard() {
         await userTemplates.setValue(updated)
         setUserList(updated)
         await doActivate(newTemplate)
-        setActiveTab('custom')
-        showStatus(`"${newTemplate.name}" uploaded and activated.`, true)
-      } catch (err) {
-        console.error('Upload failed:', err)
-        showStatus('Failed to process or save file.', false)
+        showToast(`"${newTemplate.name}" uploaded and activated.`, true)
+      } catch {
+        showToast('Failed to process HTML file.', false)
       }
     }
-
-    reader.onerror = () => {
-      showStatus('Failed to read file.', false)
-    }
-
     reader.readAsText(file)
     e.target.value = ''
   }
 
-  async function handleExport() {
+  async function handleExportBackup() {
     try {
       const data: BackupData = {
         version: 1,
@@ -229,16 +266,13 @@ export function Dashboard() {
       a.download = `wyntab-backup-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      showStatus('Backup exported successfully.', true)
+      showToast('Backup exported successfully.', true)
     } catch {
-      showStatus('Failed to export backup.', false)
+      showToast('Failed to export backup.', false)
     }
   }
 
-  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  function handleImportBackup(file: File) {
     const reader = new FileReader()
     reader.onload = async (ev) => {
       try {
@@ -249,402 +283,188 @@ export function Dashboard() {
           throw new Error('Invalid backup format')
         }
 
-        const sanitizedTemplates = data.userTemplates.map((t) => ({
+        const sanitized = data.userTemplates.map((t) => ({
           ...t,
           html: sanitizeHtml(t.html || ''),
         }))
 
-        await userTemplates.setValue(sanitizedTemplates)
+        await userTemplates.setValue(sanitized)
         if (data.activeTemplateId) {
-          const allTemplates = [...builtins, ...sanitizedTemplates]
-          const active = allTemplates.find((t) => t.id === data.activeTemplateId)
+          const all = [...builtins, ...sanitized]
+          const active = all.find((t) => t.id === data.activeTemplateId)
           if (active) {
             await doActivate(active)
           }
         }
 
         await refreshData()
-        setActiveTab('custom')
-        showStatus('Backup imported successfully.', true)
+        showToast('Backup restored successfully.', true)
       } catch {
-        showStatus('Failed to import backup. Invalid file.', false)
+        showToast('Invalid backup JSON file.', false)
       }
     }
     reader.readAsText(file)
-    e.target.value = ''
   }
 
   const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
     ? browser.runtime.getManifest().version
-    : ''
+    : '0.5.0'
 
-  // ─── Editor View ────────────────────────────────────────────────────────────
+  // ─── VIEW 4: Full-Screen Template Editor ────────────────────────────────────
   if (editingTemplate) {
     return (
-      <div className={cn("h-screen bg-background text-foreground flex flex-col font-sans", dark && "dark")}>
-        <header className="border-b border-border h-14 flex items-center justify-between px-6 shrink-0 bg-card">
-          <div className="flex items-center gap-3 min-w-0">
-            <button 
-              type="button"
-              onClick={() => setEditingTemplate(null)}
-              className="h-8 w-8 flex items-center justify-center hover:bg-muted rounded-lg border border-border"
-              title="Go back"
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <div className="truncate">
-              <span className="text-xs text-muted-foreground block leading-none mb-0.5">Editing Template</span>
-              <span className="text-sm font-semibold truncate block">{editingTemplate.name}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button 
-              type="button"
-              onClick={() => setDark(!dark)} 
-              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              title="Toggle theme"
-              aria-label="Toggle theme"
-            >
-              {dark ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-            <button 
-              type="button"
-              onClick={() => setEditingTemplate(null)}
-              className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted"
-            >
-              Discard
-            </button>
-            <button 
-              type="button"
-              onClick={doSaveCode}
-              className="h-8 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5"
-            >
-              <Save size={14} />
-              Save
-            </button>
-          </div>
-        </header>
-        <main className="grow flex overflow-hidden bg-muted/20">
-          <div className="flex-1 flex flex-col p-4 overflow-hidden">
-            <div className="grow overflow-hidden rounded-lg border border-border bg-card">
-              <Suspense fallback={<div className="p-4 text-xs text-muted-foreground">Loading editor...</div>}>
-                <Editor value={editorValue} onChange={setEditorValue} darkMode={dark} />
-              </Suspense>
-            </div>
-          </div>
-        </main>
+      <div className={cn("h-screen w-screen bg-bg-b1 text-text-primary", dark && "dark")}>
+        <TemplateEditor
+          template={editingTemplate}
+          isActive={activeId === editingTemplate.id}
+          onBack={handleBackToLibrary}
+          onSave={handleSaveEditor}
+          onSetActive={handleSetActiveFromEditor}
+          darkMode={dark}
+          onToggleTheme={() => setDark(!dark)}
+          onRequestDiscard={handleBackToLibrary}
+        />
+
+        {showUnsavedModal && (
+          <UnsavedModal
+            onSaveAndLeave={async () => {
+              await handleSaveEditor(editingTemplate.name, editingTemplate.html)
+              handleBackToLibrary()
+            }}
+            onDiscardAndLeave={handleBackToLibrary}
+            onCancel={() => setShowUnsavedModal(false)}
+          />
+        )}
+
+        <Toast toasts={toasts} onDismiss={dismissToast} />
       </div>
     )
   }
 
-  // ─── Main Dynamic Layout ────────────────────────────────────────────────────
+  // ─── Filter & Sort Processing ───────────────────────────────────────────────
+  let visibleTemplates: Template[] = []
+  if (filter === 'all') {
+    visibleTemplates = [...builtins, ...userList]
+  } else if (filter === 'custom') {
+    visibleTemplates = [...userList]
+  } else if (filter === 'builtin') {
+    visibleTemplates = [...builtins]
+  }
+
+  visibleTemplates.sort((a, b) => {
+    if (sort === 'name-asc') return a.name.localeCompare(b.name)
+    if (sort === 'name-desc') return b.name.localeCompare(a.name)
+    if (sort === 'newest') {
+      const aTime = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0
+      const bTime = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0
+      return bTime - aTime
+    }
+    return 0
+  })
+
+  // ─── Main Desktop Workstation Layout ────────────────────────────────────────
   return (
-    <div className={cn("min-h-screen bg-background text-foreground font-sans flex flex-col", dark && "dark")}>
-      <input type="file" ref={fileRef} className="hidden" accept=".html" onChange={handleFile} />
-      <input type="file" ref={backupRef} data-testid="input-backup" className="hidden" accept=".json" onChange={handleImport} />
+    <div className={cn("h-screen w-screen flex bg-bg-b1 text-text-primary overflow-hidden", dark && "dark")}>
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept=".html"
+        onChange={handleUploadFile}
+      />
 
-      {/* Top Masthead */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          {/* Brand */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="bg-primary text-primary-foreground p-1.5 rounded-lg shadow-xs">
-              <img src="/icon/128.png" className="w-4 h-4 brightness-0 invert dark:invert-0" alt="WYNTab" />
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-sm font-bold tracking-tight">WYNTab</span>
-              <span className="text-xs text-muted-foreground font-mono">v{manifestVersion}</span>
-            </div>
-          </div>
+      {/* Persistent Full-Height Left Sidebar */}
+      <Sidebar
+        activeNav={activeNav}
+        onSelectNav={setActiveNav}
+        darkMode={dark}
+        onToggleTheme={() => setDark(!dark)}
+        version={manifestVersion}
+      />
 
-          {/* Nav Tabs */}
-          <nav className="flex items-center gap-1.5" aria-label="Views">
-            <button 
-              type="button"
-              data-testid="tab-built-in"
-              onClick={() => setActiveTab('built-in')}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer",
-                activeTab === 'built-in' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
-              Built-in
-            </button>
-            <button 
-              type="button"
-              data-testid="tab-custom"
-              onClick={() => setActiveTab('custom')}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer",
-                activeTab === 'custom' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
-              Custom
-            </button>
-            <button 
-              type="button"
-              data-testid="tab-settings"
-              onClick={() => setActiveTab('settings')}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer",
-                activeTab === 'settings' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
-              Settings
-            </button>
-          </nav>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-bg-b1">
+        {activeNav === 'templates' && (
+          <>
+            {/* Top Toolbar */}
+            <TemplatesToolbar
+              filter={filter}
+              onFilterChange={setFilter}
+              sort={sort}
+              onSortChange={setSort}
+              onNewTemplate={handleNewTemplate}
+              onUploadHtml={() => fileInputRef.current?.click()}
+            />
 
-          {/* Theme Toggle */}
-          <div className="flex items-center shrink-0">
-            <button 
-              type="button"
-              onClick={() => setDark(!dark)} 
-              className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-              title="Toggle theme"
-              aria-label="Toggle theme"
-            >
-              {dark ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Desktop Workspace */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6 flex-1 space-y-6">
-        {/* Section Header */}
-        <div className="flex items-center justify-between gap-4 pb-4 border-b border-border">
-          <div>
-            <h2 className="text-base font-bold text-foreground">
-              {activeTab === 'built-in' && 'Built-in Gallery'}
-              {activeTab === 'custom' && 'Custom Library'}
-              {activeTab === 'settings' && 'Settings'}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {activeTab === 'built-in' && 'Minimalist, distraction-free templates for your new tab.'}
-              {activeTab === 'custom' && 'Upload HTML files or write custom styles for full control.'}
-              {activeTab === 'settings' && 'Manage extension storage, security notices, and preferences.'}
-            </p>
-          </div>
-
-          {activeTab === 'custom' && userList.length > 0 && (
-            <div className="flex items-center gap-2 shrink-0">
-              <button 
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus size={14} />
-                Upload HTML
-              </button>
-              <button 
-                type="button"
-                onClick={handleExport}
-                className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5 cursor-pointer"
-              >
-                <Download size={14} />
-                Export
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Built-in Gallery Stream */}
-        {activeTab === 'built-in' && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {builtins.map((t) => (
-              <TemplateCard
-                key={t.id}
-                template={t}
-                isActive={t.id === activeId}
-                onActivate={() => doActivate(t)}
-                onDuplicate={() => doDuplicate(t)}
-                onPreview={() => setPreviewTemplate(t)}
-                onEditCode={() => {}}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Custom Library Stream */}
-        {activeTab === 'custom' && (
-          userList.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {userList.map((t) => (
-                <TemplateCard
-                  key={t.id}
-                  template={t}
-                  isActive={t.id === activeId}
-                  onActivate={() => doActivate(t)}
-                  onDelete={() => doDelete(t.id)}
-                  onRename={(name) => doRename(t.id, name)}
-                  onDuplicate={() => doDuplicate(t)}
-                  onPreview={() => setPreviewTemplate(t)}
-                  onEditCode={() => {
-                    setEditingTemplate(t)
-                    setEditorValue(t.html)
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="max-w-lg mx-auto w-full rounded-lg border border-dashed border-border p-10 text-center flex flex-col items-center gap-3 my-8">
-              <div className="h-10 w-10 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground">
-                <Code2 size={20} />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">No Custom Templates Yet</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Upload an HTML file or start with a blank live editor template.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 pt-2">
-                <button 
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="h-8 px-3.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus size={14} />
-                  Upload HTML
-                </button>
-                <button 
-                  type="button"
-                  onClick={handleCreateBlank}
-                  className="h-8 px-3.5 rounded-lg border border-border text-xs font-medium hover:bg-muted flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Code2 size={14} />
-                  Create Live
-                </button>
-              </div>
-            </div>
-          )
-        )}
-
-        {/* Settings Stream */}
-        {activeTab === 'settings' && (
-          <div className="w-full space-y-6">
-            {/* System Information */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">System Information</h3>
-              <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <Info size={14} /> Version
-                  </span>
-                  <span className="font-mono font-medium">{manifestVersion}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <Monitor size={14} /> Platform
-                  </span>
-                  <span className="font-mono font-medium">Web Extension</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Security & CSP */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Security</h3>
-              <div className="rounded-lg border border-border bg-card p-4">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck size={18} className="text-muted-foreground mt-0.5" />
-                  <div className="text-xs space-y-1">
-                    <h4 className="font-semibold text-foreground">Scripts Disabled (CSP)</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      To protect your browser from security exploits, custom HTML templates execute in a sandboxed frame without external scripts. Rely on HTML and CSS.
+            {/* Template Gallery Canvas */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-7xl mx-auto">
+                {visibleTemplates.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {visibleTemplates.map((t) => (
+                      <TemplateCard
+                        key={t.id}
+                        template={t}
+                        isActive={t.id === activeId}
+                        onActivate={() => doActivate(t)}
+                        onDeactivate={() => doDeactivate(t)}
+                        onDuplicate={() => doDuplicate(t)}
+                        onEditCode={() => {
+                          if (t.isBuiltin) {
+                            handleForkBuiltin(t)
+                          } else {
+                            setEditingTemplate(t)
+                            setIsNewDraft(false)
+                          }
+                        }}
+                        onDelete={t.isBuiltin ? undefined : () => setDeletingTemplate(t)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  /* Clean Instructional Empty State */
+                  <div className="max-w-md mx-auto my-16 p-8 rounded-md border border-dashed border-divider-bright text-center space-y-3 bg-bg-a1">
+                    <h3 className="text-sm font-semibold text-text-primary">No Custom Templates Yet</h3>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      Use the <strong className="text-accent-bright font-semibold">+</strong> (New Template) or <strong className="text-text-primary font-semibold">Upload</strong> icon buttons in the top right toolbar to add your first template.
                     </p>
                   </div>
-                </div>
+                )}
               </div>
             </div>
+          </>
+        )}
 
-            {/* Data Management */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Management</h3>
-              <div className="rounded-lg border border-border bg-card p-4 space-y-4">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Your custom templates are stored in local browser storage. Export a backup JSON file to keep your work safe.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button 
-                    type="button"
-                    onClick={handleExport}
-                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
-                  >
-                    <Download size={14} />
-                    Export Backup
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => backupRef.current?.click()}
-                    className="h-8 px-3 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
-                  >
-                    <FileUp size={14} />
-                    Import JSON
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+        {activeNav === 'settings' && (
+          <SettingsPage
+            customCount={userList.length}
+            onExportBackup={handleExportBackup}
+            onImportBackup={handleImportBackup}
+          />
+        )}
+
+        {activeNav === 'about' && (
+          <AboutPage version={manifestVersion} />
         )}
       </main>
 
-      {/* Large Preview Modal */}
-      {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/80">
-          <div className="w-full max-w-5xl h-[85vh] bg-card border border-border rounded-lg flex flex-col overflow-hidden shadow-2xl">
-            <header className="h-12 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
-              <div className="flex items-center gap-2">
-                <Eye size={16} className="text-muted-foreground" />
-                <h3 className="text-sm font-semibold">{previewTemplate.name}</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <button 
-                  type="button"
-                  onClick={() => { doActivate(previewTemplate); setPreviewTemplate(null); }}
-                  className="h-7 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
-                >
-                  Activate
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setPreviewTemplate(null)}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
-                  title="Close preview"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </header>
-            <div className="flex-1 bg-muted/30 overflow-hidden">
-              <iframe 
-                srcDoc={`<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${previewTemplate.html}`}
-                scrolling="no"
-                className="w-full h-full border-none pointer-events-none"
-                title="Large Preview"
-                sandbox="allow-scripts allow-same-origin allow-forms"
-              />
-            </div>
-          </div>
-        </div>
+      {/* Delete Confirmation Modal with Active Safeguard */}
+      {deletingTemplate && (
+        <DeleteConfirmModal
+          template={deletingTemplate}
+          isActive={deletingTemplate.id === activeId}
+          onConfirm={doConfirmDelete}
+          onCancel={() => setDeletingTemplate(null)}
+        />
       )}
 
-      {/* Status Toast Notification */}
-      {status && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-          <div className={cn(
-            'rounded-lg border px-4 py-2 text-xs font-medium shadow-lg whitespace-nowrap flex items-center gap-2', 
-            status.ok ? 'border-border bg-card text-foreground' : 'border-destructive/40 bg-destructive/10 text-destructive'
-          )}>
-            {status.ok ? <CheckCircle2 size={14} className="text-green-600 dark:text-green-400" /> : <X size={14} />}
-            {status.msg}
-          </div>
-        </div>
-      )}
+      {/* Global Toast Stack */}
+      <Toast toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
 }
 
-// ─── App Root ──────────────────────────────────────────────────────────────
+// ─── App Mount ────────────────────────────────────────────────────────────────
 const rootEl = document.getElementById('root')
 if (rootEl) {
   createRoot(rootEl).render(<Dashboard />)

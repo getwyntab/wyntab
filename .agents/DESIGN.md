@@ -1,17 +1,17 @@
 ---
 version: "alpha"
 name: WYNTab
-description: "Design system for WYNTab browser extension full-tab dashboard and newtab surfaces"
+description: "Utilitarian design system for WYNTab browser extension full-tab dashboard and newtab surfaces"
 colors:
-  primary: "#111827"
-  primary-hover: "#1F2937"
-  on-primary: "#FFFFFF"
-  secondary: "#4B5563"
-  on-secondary: "#FFFFFF"
-  surface: "#FFFFFF"
-  on-surface: "#111827"
-  surface-muted: "#F3F4F6"
-  border: "#E5E7EB"
+  primary: "#D37918"
+  primary-hover: "#FC9729"
+  on-primary: "#161616"
+  secondary: "#969696"
+  on-secondary: "#161616"
+  surface: "#222222"
+  on-surface: "#EAEAEA"
+  surface-muted: "#1F1F1F"
+  border: "#373737"
   error: "#DC2626"
   on-error: "#FFFFFF"
 typography:
@@ -73,7 +73,7 @@ components:
   card:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.on-surface}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.md}"
   badge-active:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
@@ -94,68 +94,25 @@ components:
 ## Overview
 
 WYNTab is a distraction-free, functional utility extension for replacing the browser New Tab page with custom HTML.
-The UI adheres to utilitarian minimalism: crisp contrast, intuitive controls, and responsive density.
-It avoids decorative noise, faux-cyberpunk glowing outlines, or bloated animations.
+The UI adheres to Linear/Raycast/Violentmonkey utilitarian minimalism: high-contrast dark-first design, amber accents (#D37918), 1px solid structural dividers, and zero AI visual slop.
 
 ## Colors
 
-The palette emphasizes clean monochrome fundamentals with high contrast to ensure readability across light and dark modes:
-
-- **Primary (#111827)**: Deep slate for prominent CTAs, active badges, and core headings.
-- **Secondary (#4B5563)**: Medium slate for secondary labels, borders, and subtle badges.
-- **Surface (#FFFFFF)**: Pure white canvas for cards and elevated panels in light theme.
-- **Surface Muted (#F3F4F6)**: Soft neutral background for secondary actions, chip states, and nested wells.
-- **Border (#E5E7EB)**: Crisp 1px outline for structural hierarchy and separation.
-- **Error (#DC2626)**: Reserved strictly for destructive actions (e.g. deleting templates) and error states.
+The palette emphasizes dark-first high-contrast fundamentals with an amber accent:
+- **Primary (#D37918)**: Utilitarian amber accent for active badges, toggles, and primary CTAs. Text on primary is #161616 bold.
+- **Secondary (#969696)**: Muted gray for auxiliary labels, status markers, and secondary borders.
+- **Surface (#222222)**: Dark card surface and modal container backdrop in dark theme.
+- **Surface Muted (#1F1F1F)**: Secondary action surface and recessed wells.
+- **Border (#373737)**: Crisp 1px structural hairline dividing panes, headers, and cards.
+- **Error (#DC2626)**: Reserved strictly for destructive actions (e.g. deleting templates).
 
 ## Typography
 
-Typography uses the native system font stack (`system-ui, sans-serif`) for instant rendering with zero network latency.
-
-- **Headlines (`headline-lg`, `headline-md`)**: 18px-24px bold/semibold for view titles and dialog headers.
-- **Body (`body-lg`, `body-md`, `body-sm`)**: 12px-15px readable weights. Minimum body font size is strictly 12px (never 8px or 9px micro-text).
-- **Labels (`label-md`)**: 12px semibold for tab navigation and action triggers. Tracking is kept standard (no tracking-[0.2em] artificial letter-spacing).
+Typography uses the native system font stack (`system-ui, sans-serif`) for instant zero-latency rendering.
+- **Headlines (`headline-lg`, `headline-md`)**: 18px-24px semibold/bold for view titles and dialog headers.
+- **Body (`body-lg`, `body-md`, `body-sm`)**: 12px-15px readable weights. Minimum body font size is strictly 12px.
+- **Labels (`label-md`)**: 12px semibold for tab navigation and action triggers.
 
 ## Layout
 
-The UI operates as a dedicated full-page desktop application (>= 768px, optimized for standard 1080p and widescreen displays):
-
-- **Dashboard Workspace**: Full-width canvas with responsive multi-column template grid (`spacing.lg` gutters).
-- **Navigation & Controls**: Unconstrained desktop toolbars and sidebars with clear, direct action triggers.
-- **Editor Canvas**: Spacious layout for side-by-side or full-height code authoring and live sandboxed previewing.
-
-## Elevation & Depth
-
-Visual hierarchy is communicated via clean 1px structural borders and subtle tonal contrast rather than exaggerated blur halos or glowing rings:
-- Inactive cards use a subtle `border` on `surface`.
-- Active template cards use a clear `primary` border highlight.
-- Modals use a clean translucent backdrop with solid surface containment.
-
-## Shapes
-
-Shapes follow restrained geometric radii:
-- Buttons and form inputs use `rounded.md` (8px).
-- Cards and panels use `rounded.lg` (12px).
-- Status pills and avatar chips use `rounded.full` (9999px).
-- Sharp, jarring corner accents or glowing brackets are strictly prohibited.
-
-## Components
-
-- **Buttons**:
-  - `button-primary`: Dark solid fill with light text for primary activation and save actions.
-  - `button-secondary`: Muted neutral fill with dark text for previews, duplications, and secondary actions.
-  - Sizing ensures minimum 36px-40px click/touch target.
-- **Cards (`card`)**:
-  - Contains preview thumbnail, title, template badge, and accessible action buttons.
-  - Actions must remain visible and accessible without requiring mouse hover.
-- **Tabs**:
-  - Clean pill or border indicator for active section (Built-in, Custom, Settings).
-
-## Do's and Don'ts
-
-- **Do** support clean responsive desktop layouts (>= 768px) without horizontal scrolling.
-- **Do** keep actions visible or accessible via keyboard/touch, not hover-only overlays.
-- **Do** maintain WCAG AA contrast (minimum 4.5:1) for all text and interactive elements.
-- **Don't** add decorative glowing corner brackets, blur pseudo-elements, or cybernetic borders.
-- **Don't** use micro-typography below 12px or extreme letter spacing (`tracking-[0.2em]`).
-- **Don't** use slow, gratuitous UI animations (keep transitions under 200ms).
+The UI operates as a dedicated full-page desktop application (>= 1024px) with a persistent 240px left sidebar and responsive 3-column template grid (max width 1440px). The Template Editor locks to a full-screen 100vw x 100vh canvas with a 50/50 draggable split view.

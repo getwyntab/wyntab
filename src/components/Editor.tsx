@@ -10,6 +10,21 @@ export interface EditorProps {
   darkMode?: boolean
 }
 
+const lightTheme = EditorView.theme({
+  '&': { height: '100%', fontSize: '13px', backgroundColor: 'var(--bg-b2)', color: 'var(--text-primary)' },
+  '.cm-scroller': { overflow: 'auto', fontFamily: 'monospace' },
+  '.cm-content': { caretColor: 'var(--accent-main)' },
+  '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--accent-main)' },
+  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: 'rgba(211, 121, 24, 0.25)' },
+  '.cm-gutters': { backgroundColor: 'var(--bg-a2)', color: 'var(--text-muted)', borderRight: '1px solid var(--divider-dim)' },
+})
+
+const darkTheme = EditorView.theme({
+  '&': { height: '100%', fontSize: '13px', backgroundColor: 'var(--bg-b2)', color: 'var(--text-primary)' },
+  '.cm-scroller': { overflow: 'auto', fontFamily: 'monospace' },
+  '.cm-gutters': { backgroundColor: 'var(--bg-a2)', color: 'var(--text-muted)', borderRight: '1px solid var(--divider-dim)' },
+})
+
 export function Editor({ value, onChange, darkMode }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
@@ -23,15 +38,11 @@ export function Editor({ value, onChange, darkMode }: EditorProps) {
       extensions: [
         basicSetup,
         html(),
-        themeCompartment.current.of(darkMode ? oneDark : []),
+        themeCompartment.current.of(darkMode ? [oneDark, darkTheme] : [lightTheme]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString())
           }
-        }),
-        EditorView.theme({
-          '&': { height: '100%', fontSize: '13px' },
-          '.cm-scroller': { overflow: 'auto' },
         }),
       ],
     })
@@ -52,14 +63,14 @@ export function Editor({ value, onChange, darkMode }: EditorProps) {
   useEffect(() => {
     if (!viewRef.current) return
     viewRef.current.dispatch({
-      effects: themeCompartment.current.reconfigure(darkMode ? oneDark : []),
+      effects: themeCompartment.current.reconfigure(darkMode ? [oneDark, darkTheme] : [lightTheme]),
     })
   }, [darkMode])
 
   return (
     <div 
       ref={containerRef} 
-      className="h-full w-full border border-border rounded-sm overflow-hidden shadow-inner bg-card"
+      className="h-full w-full overflow-hidden bg-bg-b2"
     />
   )
 }

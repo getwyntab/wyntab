@@ -25,17 +25,17 @@ describe('TemplateCard component', () => {
         template={mockBuiltinTemplate}
         isActive={false}
         onActivate={vi.fn()}
+        onDeactivate={vi.fn()}
         onDuplicate={vi.fn()}
         onEditCode={vi.fn()}
-        onPreview={vi.fn()}
       />
     )
 
     expect(screen.getByText('Minimal Clock')).toBeInTheDocument()
-    expect(screen.getByText('Built-in template')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^activate$/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^preview$/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /duplicate to customize/i })).toBeInTheDocument()
+    expect(screen.getByText('Built-in')).toBeInTheDocument()
+    expect(screen.getByRole('switch')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /fork to edit/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /duplicate template/i })).toBeInTheDocument()
   })
 
   it('displays active state badge when template is active', () => {
@@ -44,90 +44,60 @@ describe('TemplateCard component', () => {
         template={mockBuiltinTemplate}
         isActive={true}
         onActivate={vi.fn()}
+        onDeactivate={vi.fn()}
         onDuplicate={vi.fn()}
         onEditCode={vi.fn()}
-        onPreview={vi.fn()}
       />
     )
 
+    const switchEl = screen.getByRole('switch')
+    expect(switchEl).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByText('Active')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^activate$/i })).not.toBeInTheDocument()
   })
 
-  it('calls onActivate when Activate button is clicked', () => {
+  it('calls onActivate when inactive switch toggle is clicked', () => {
     const handleActivate = vi.fn()
+    const handleDeactivate = vi.fn()
+
     render(
       <TemplateCard
         template={mockBuiltinTemplate}
         isActive={false}
         onActivate={handleActivate}
+        onDeactivate={handleDeactivate}
         onDuplicate={vi.fn()}
         onEditCode={vi.fn()}
-        onPreview={vi.fn()}
       />
     )
 
-    const activateBtn = screen.getByRole('button', { name: /^activate$/i })
-    fireEvent.click(activateBtn)
+    const switchEl = screen.getByRole('switch')
+    fireEvent.click(switchEl)
     expect(handleActivate).toHaveBeenCalledTimes(1)
+    expect(handleDeactivate).not.toHaveBeenCalled()
   })
 
-  it('calls onPreview when clicking thumbnail frame', () => {
-    const handlePreview = vi.fn()
+  it('calls onDeactivate when active switch toggle is clicked', () => {
+    const handleActivate = vi.fn()
+    const handleDeactivate = vi.fn()
+
     render(
       <TemplateCard
         template={mockBuiltinTemplate}
-        isActive={false}
-        onActivate={vi.fn()}
+        isActive={true}
+        onActivate={handleActivate}
+        onDeactivate={handleDeactivate}
         onDuplicate={vi.fn()}
         onEditCode={vi.fn()}
-        onPreview={handlePreview}
       />
     )
 
-    const previewArea = screen.getByLabelText(/preview minimal clock full screen/i)
-    fireEvent.click(previewArea)
-    expect(handlePreview).toHaveBeenCalledTimes(1)
+    const switchEl = screen.getByRole('switch')
+    fireEvent.click(switchEl)
+    expect(handleDeactivate).toHaveBeenCalledTimes(1)
+    expect(handleActivate).not.toHaveBeenCalled()
   })
 
-  it('calls onPreview when clicking Preview text action button', () => {
-    const handlePreview = vi.fn()
-    render(
-      <TemplateCard
-        template={mockBuiltinTemplate}
-        isActive={false}
-        onActivate={vi.fn()}
-        onDuplicate={vi.fn()}
-        onEditCode={vi.fn()}
-        onPreview={handlePreview}
-      />
-    )
-
-    const previewBtn = screen.getByRole('button', { name: /^preview$/i })
-    fireEvent.click(previewBtn)
-    expect(handlePreview).toHaveBeenCalledTimes(1)
-  })
-
-  it('calls onPreview with Enter key on thumbnail frame for keyboard accessibility', () => {
-    const handlePreview = vi.fn()
-    render(
-      <TemplateCard
-        template={mockBuiltinTemplate}
-        isActive={false}
-        onActivate={vi.fn()}
-        onDuplicate={vi.fn()}
-        onEditCode={vi.fn()}
-        onPreview={handlePreview}
-      />
-    )
-
-    const previewArea = screen.getByLabelText(/preview minimal clock full screen/i)
-    fireEvent.keyDown(previewArea, { key: 'Enter' })
-    expect(handlePreview).toHaveBeenCalledTimes(1)
-  })
-
-  it('provides preview, edit, duplicate, and delete text actions for custom templates', () => {
-    const handlePreview = vi.fn()
+  it('provides edit code, duplicate, and delete actions for custom templates', () => {
     const handleEdit = vi.fn()
     const handleDuplicate = vi.fn()
     const handleDelete = vi.fn()
@@ -137,22 +107,18 @@ describe('TemplateCard component', () => {
         template={mockCustomTemplate}
         isActive={false}
         onActivate={vi.fn()}
+        onDeactivate={vi.fn()}
         onDuplicate={handleDuplicate}
         onEditCode={handleEdit}
         onDelete={handleDelete}
-        onPreview={handlePreview}
       />
     )
 
-    expect(screen.getByText('Custom template')).toBeInTheDocument()
+    expect(screen.getByText('Custom')).toBeInTheDocument()
 
-    const previewBtn = screen.getByRole('button', { name: /^preview$/i })
-    const editBtn = screen.getByRole('button', { name: /edit html/i })
-    const duplicateBtn = screen.getByRole('button', { name: /^duplicate$/i })
-    const deleteBtn = screen.getByRole('button', { name: /delete/i })
-
-    fireEvent.click(previewBtn)
-    expect(handlePreview).toHaveBeenCalledTimes(1)
+    const editBtn = screen.getByRole('button', { name: /edit code/i })
+    const duplicateBtn = screen.getByRole('button', { name: /duplicate template/i })
+    const deleteBtn = screen.getByRole('button', { name: /delete template/i })
 
     fireEvent.click(editBtn)
     expect(handleEdit).toHaveBeenCalledTimes(1)

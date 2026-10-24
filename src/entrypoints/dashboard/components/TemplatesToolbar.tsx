@@ -135,18 +135,8 @@ export function TemplatesToolbar({
         )}
       </div>
 
-      {/* Right Zone: Primary + Button followed by Upload Button */}
+      {/* Right Zone: Secondary Upload Button followed by Primary + Button */}
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onNewTemplate}
-          className="h-8 w-8 rounded-md bg-accent-main hover:bg-accent-bright text-text-on-accent flex items-center justify-center transition-colors shadow-xs font-bold"
-          title="Create blank template"
-          aria-label="Create blank template"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-        </button>
-
         <button
           type="button"
           onClick={onUploadHtml}
@@ -155,6 +145,16 @@ export function TemplatesToolbar({
           aria-label="Upload .html template"
         >
           <Upload size={14} />
+        </button>
+
+        <button
+          type="button"
+          onClick={onNewTemplate}
+          className="h-8 w-8 rounded-md bg-accent-main hover:bg-accent-bright text-text-on-accent flex items-center justify-center transition-colors shadow-xs font-bold"
+          title="Create blank template"
+          aria-label="Create blank template"
+        >
+          <Plus size={16} strokeWidth={2.5} />
         </button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { getBuiltinTemplates, type Template } from '@/lib/templates'
 import { activeTemplateHtml, activeTemplateId, userTemplates } from '@/lib/storage'
 import { STARTER_HTML } from '@/lib/constants'
+import { transpileTemplateHtml } from '@/lib/transpile'
 
 // Modular Components
 import { Sidebar, type DashboardNav } from './components/Sidebar'
@@ -88,7 +89,7 @@ export function Dashboard() {
       if (!id && defaultT) {
         await Promise.all([
           activeTemplateId.setValue(defaultT.id),
-          activeTemplateHtml.setValue(defaultT.html),
+          activeTemplateHtml.setValue(transpileTemplateHtml(defaultT.html)),
         ])
         setActiveId(defaultT.id)
       } else {
@@ -117,7 +118,7 @@ export function Dashboard() {
   async function doActivate(template: Template) {
     await Promise.all([
       activeTemplateId.setValue(template.id),
-      activeTemplateHtml.setValue(template.html),
+      activeTemplateHtml.setValue(transpileTemplateHtml(template.html)),
     ])
     setActiveId(template.id)
     showToast(`"${template.name}" activated.`, true)
@@ -198,7 +199,7 @@ export function Dashboard() {
 
     // Update live active newtab if editing currently active template
     if (activeId === editingTemplate.id) {
-      await activeTemplateHtml.setValue(html)
+      await activeTemplateHtml.setValue(transpileTemplateHtml(html))
     }
 
     setIsNewDraft(false)

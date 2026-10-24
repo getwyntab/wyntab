@@ -29,270 +29,138 @@
     </div>
   </div>
 
-  <script type="text/babel" data-type="module" data-presets="react">
-    import React, { useState, useEffect } from 'react'
-    import { createRoot } from 'react-dom/client'
-    import { Search, Plus, Trash2, ExternalLink, Globe, Compass, Code, Share2, Wrench, X } from 'lucide-react'
-
-    const DEFAULT_BOOKMARKS = [
-      { id: '1', title: 'GitHub', url: 'https://github.com', category: 'Dev', icon: 'Code' },
-      { id: '2', title: 'MDN Web Docs', url: 'https://developer.mozilla.org', category: 'Dev', icon: 'Code' },
-      { id: '3', title: 'Reddit', url: 'https://reddit.com', category: 'Social', icon: 'Share2' },
-      { id: '4', title: 'YouTube', url: 'https://youtube.com', category: 'Social', icon: 'Share2' },
-      { id: '5', title: 'Figma', url: 'https://figma.com', category: 'Tools', icon: 'Wrench' },
-      { id: '6', title: 'Vercel', url: 'https://vercel.com', category: 'Tools', icon: 'Wrench' },
-    ]
-
-    function LinksApp() {
-      const [bookmarks, setBookmarks] = useState(DEFAULT_BOOKMARKS)
-      const [searchQuery, setSearchQuery] = useState('')
-      const [selectedCategory, setSelectedCategory] = useState('All')
-      const [showAddModal, setShowAddModal] = useState(false)
-      const [newTitle, setNewTitle] = useState('')
-      const [newUrl, setNewUrl] = useState('')
-      const [newCategory, setNewCategory] = useState('Dev')
-
-      // Load persisted bookmarks
-      useEffect(() => {
+  <script type="module">
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Search, Plus, Trash2, ExternalLink, Globe, Compass, X } from 'lucide-react';
+const DEFAULT_BOOKMARKS = [
+    { id: '1', title: 'GitHub', url: 'https://github.com', category: 'Dev', icon: 'Code' },
+    { id: '2', title: 'MDN Web Docs', url: 'https://developer.mozilla.org', category: 'Dev', icon: 'Code' },
+    { id: '3', title: 'Reddit', url: 'https://reddit.com', category: 'Social', icon: 'Share2' },
+    { id: '4', title: 'YouTube', url: 'https://youtube.com', category: 'Social', icon: 'Share2' },
+    { id: '5', title: 'Figma', url: 'https://figma.com', category: 'Tools', icon: 'Wrench' },
+    { id: '6', title: 'Vercel', url: 'https://vercel.com', category: 'Tools', icon: 'Wrench' },
+];
+function LinksApp() {
+    const [bookmarks, setBookmarks] = useState(DEFAULT_BOOKMARKS);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newTitle, setNewTitle] = useState('');
+    const [newUrl, setNewUrl] = useState('');
+    const [newCategory, setNewCategory] = useState('Dev');
+    // Load persisted bookmarks
+    useEffect(() => {
         if (window.wyntab) {
-          window.wyntab.get('custom_bookmarks').then(saved => {
-            if (Array.isArray(saved) && saved.length > 0) {
-              setBookmarks(saved)
-            }
-          })
+            window.wyntab.get('custom_bookmarks').then(saved => {
+                if (Array.isArray(saved) && saved.length > 0) {
+                    setBookmarks(saved);
+                }
+            });
         }
-      }, [])
-
-      const persistBookmarks = (updated) => {
-        setBookmarks(updated)
+    }, []);
+    const persistBookmarks = (updated) => {
+        setBookmarks(updated);
         if (window.wyntab) {
-          window.wyntab.set('custom_bookmarks', updated)
+            window.wyntab.set('custom_bookmarks', updated);
         }
-      }
-
-      const handleAddBookmark = (e) => {
-        e.preventDefault()
-        if (!newTitle.trim() || !newUrl.trim()) return
-
-        let url = newUrl.trim()
-        if (!/^https?:\/\//i.test(url)) url = `https://${url}`
-
+    };
+    const handleAddBookmark = (e) => {
+        e.preventDefault();
+        if (!newTitle.trim() || !newUrl.trim())
+            return;
+        let url = newUrl.trim();
+        if (!/^https?:\/\//i.test(url))
+            url = `https://${url}`;
         const newItem = {
-          id: Date.now().toString(),
-          title: newTitle.trim(),
-          url,
-          category: newCategory,
-          icon: newCategory === 'Dev' ? 'Code' : newCategory === 'Tools' ? 'Wrench' : 'Share2'
-        }
-
-        persistBookmarks([...bookmarks, newItem])
-        setNewTitle('')
-        setNewUrl('')
-        setShowAddModal(false)
-      }
-
-      const handleDeleteBookmark = (id, e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        const updated = bookmarks.filter(b => b.id !== id)
-        persistBookmarks(updated)
-      }
-
-      // Filter logic
-      const filtered = bookmarks.filter(b => {
-        const matchesCategory = selectedCategory === 'All' || b.category === selectedCategory
+            id: Date.now().toString(),
+            title: newTitle.trim(),
+            url,
+            category: newCategory,
+            icon: newCategory === 'Dev' ? 'Code' : newCategory === 'Tools' ? 'Wrench' : 'Share2'
+        };
+        persistBookmarks([...bookmarks, newItem]);
+        setNewTitle('');
+        setNewUrl('');
+        setShowAddModal(false);
+    };
+    const handleDeleteBookmark = (id, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = bookmarks.filter(b => b.id !== id);
+        persistBookmarks(updated);
+    };
+    // Filter logic
+    const filtered = bookmarks.filter(b => {
+        const matchesCategory = selectedCategory === 'All' || b.category === selectedCategory;
         const matchesQuery = b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          b.url.toLowerCase().includes(searchQuery.toLowerCase())
-        return matchesCategory && matchesQuery
-      })
+            b.url.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesQuery;
+    });
+    const categories = ['All', 'Dev', 'Social', 'Tools'];
+    return (React.createElement("div", { className: "min-h-screen flex flex-col p-8 sm:p-12 max-w-5xl mx-auto w-full" },
+        React.createElement("header", { className: "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8" },
+            React.createElement("div", { className: "flex items-center gap-3" },
+                React.createElement("div", { className: "w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400" },
+                    React.createElement(Compass, { className: "w-5 h-5" })),
+                React.createElement("div", null,
+                    React.createElement("h1", { className: "text-lg font-bold text-slate-100" }, "Bookmarks"),
+                    React.createElement("p", { className: "text-xs text-slate-500" }, "Quick launch command center"))),
+            React.createElement("div", { className: "flex items-center gap-2 w-full sm:w-auto" },
+                React.createElement("div", { className: "relative flex-1 sm:w-64" },
+                    React.createElement(Search, { className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" }),
+                    React.createElement("input", { type: "text", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), placeholder: "Filter links...", className: "w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-500 text-xs outline-none focus:border-indigo-500 transition-colors" })),
+                React.createElement("button", { type: "button", onClick: () => setShowAddModal(true), className: "flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shrink-0 shadow-sm" },
+                    React.createElement(Plus, { className: "w-4 h-4" }),
+                    React.createElement("span", null, "Add")))),
+        React.createElement("div", { className: "flex items-center gap-1 mb-6 border-b border-slate-800 pb-3" }, categories.map(cat => (React.createElement("button", { key: cat, type: "button", onClick: () => setSelectedCategory(cat), className: `px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${selectedCategory === cat
+                ? 'bg-slate-800 text-white shadow-xs'
+                : 'text-slate-400 hover:text-slate-200'}` }, cat)))),
+        React.createElement("main", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" },
+            filtered.map(b => (React.createElement("a", { key: b.id, href: b.url, target: "_blank", rel: "noreferrer", className: "group p-4 rounded-2xl bg-slate-900/70 hover:bg-slate-850 border border-slate-800/80 hover:border-slate-700 flex items-center justify-between transition-all hover:-translate-y-0.5 shadow-sm" },
+                React.createElement("div", { className: "flex items-center gap-3.5 min-w-0" },
+                    React.createElement("div", { className: "w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0" },
+                        React.createElement(Globe, { className: "w-5 h-5" })),
+                    React.createElement("div", { className: "min-w-0" },
+                        React.createElement("div", { className: "font-semibold text-sm text-slate-200 group-hover:text-white truncate" }, b.title),
+                        React.createElement("div", { className: "text-[11px] font-mono text-slate-500 truncate" }, b.url.replace(/^https?:\/\//i, '').replace(/\/$/, '')))),
+                React.createElement("div", { className: "flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" },
+                    React.createElement("button", { type: "button", onClick: (e) => handleDeleteBookmark(b.id, e), className: "p-1.5 rounded-lg hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 transition-colors", title: "Remove bookmark" },
+                        React.createElement(Trash2, { className: "w-3.5 h-3.5" })),
+                    React.createElement(ExternalLink, { className: "w-3.5 h-3.5 text-slate-500" }))))),
+            filtered.length === 0 && (React.createElement("div", { className: "col-span-full py-16 text-center text-slate-500 text-sm" },
+                "No bookmarks found matching \"",
+                searchQuery,
+                "\""))),
+        showAddModal && (React.createElement("div", { className: "fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" },
+            React.createElement("div", { className: "w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl" },
+                React.createElement("div", { className: "flex items-center justify-between mb-5" },
+                    React.createElement("h2", { className: "text-base font-bold text-white" }, "Add Bookmark"),
+                    React.createElement("button", { type: "button", onClick: () => setShowAddModal(false), className: "p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors" },
+                        React.createElement(X, { className: "w-4 h-4" }))),
+                React.createElement("form", { onSubmit: handleAddBookmark, className: "flex flex-col gap-4" },
+                    React.createElement("div", null,
+                        React.createElement("label", { className: "block text-xs font-medium text-slate-400 mb-1.5" }, "Title"),
+                        React.createElement("input", { type: "text", required: true, autoFocus: true, value: newTitle, onChange: (e) => setNewTitle(e.target.value), placeholder: "e.g. Linear, GitHub...", className: "w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500" })),
+                    React.createElement("div", null,
+                        React.createElement("label", { className: "block text-xs font-medium text-slate-400 mb-1.5" }, "URL"),
+                        React.createElement("input", { type: "text", required: true, value: newUrl, onChange: (e) => setNewUrl(e.target.value), placeholder: "e.g. linear.app", className: "w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500" })),
+                    React.createElement("div", null,
+                        React.createElement("label", { className: "block text-xs font-medium text-slate-400 mb-1.5" }, "Category"),
+                        React.createElement("select", { value: newCategory, onChange: (e) => setNewCategory(e.target.value), className: "w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500" },
+                            React.createElement("option", { value: "Dev" }, "Dev"),
+                            React.createElement("option", { value: "Social" }, "Social"),
+                            React.createElement("option", { value: "Tools" }, "Tools"))),
+                    React.createElement("div", { className: "flex items-center justify-end gap-2 mt-2" },
+                        React.createElement("button", { type: "button", onClick: () => setShowAddModal(false), className: "px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-medium transition-colors" }, "Cancel"),
+                        React.createElement("button", { type: "submit", className: "px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors" }, "Save Bookmark")))))),
+        React.createElement("footer", { className: "text-center text-xs text-slate-600 font-mono mt-auto pt-6" },
+            React.createElement("span", null,
+                bookmarks.length,
+                " Bookmarks active"))));
+}
+createRoot(document.getElementById('root')).render(React.createElement(LinksApp, null));
 
-      const categories = ['All', 'Dev', 'Social', 'Tools']
-
-      return (
-        <div className="min-h-screen flex flex-col p-8 sm:p-12 max-w-5xl mx-auto w-full">
-          {/* Top Bar */}
-          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                <Compass className="w-5 h-5" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-slate-100">Bookmarks</h1>
-                <p className="text-xs text-slate-500">Quick launch command center</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              {/* Search Bar */}
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter links..."
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-500 text-xs outline-none focus:border-indigo-500 transition-colors"
-                />
-              </div>
-
-              {/* Add Link Button */}
-              <button
-                type="button"
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shrink-0 shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add</span>
-              </button>
-            </div>
-          </header>
-
-          {/* Category Tabs */}
-          <div className="flex items-center gap-1 mb-6 border-b border-slate-800 pb-3">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  selectedCategory === cat
-                    ? 'bg-slate-800 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Grid of Links */}
-          <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {filtered.map(b => (
-              <a
-                key={b.id}
-                href={b.url}
-                target="_blank"
-                rel="noreferrer"
-                className="group p-4 rounded-2xl bg-slate-900/70 hover:bg-slate-850 border border-slate-800/80 hover:border-slate-700 flex items-center justify-between transition-all hover:-translate-y-0.5 shadow-sm"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0">
-                    <Globe className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm text-slate-200 group-hover:text-white truncate">
-                      {b.title}
-                    </div>
-                    <div className="text-[11px] font-mono text-slate-500 truncate">
-                      {b.url.replace(/^https?:\/\//i, '').replace(/\/$/, '')}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    type="button"
-                    onClick={(e) => handleDeleteBookmark(b.id, e)}
-                    className="p-1.5 rounded-lg hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 transition-colors"
-                    title="Remove bookmark"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                </div>
-              </a>
-            ))}
-
-            {filtered.length === 0 && (
-              <div className="col-span-full py-16 text-center text-slate-500 text-sm">
-                No bookmarks found matching "{searchQuery}"
-              </div>
-            )}
-          </main>
-
-          {/* Add Bookmark Modal */}
-          {showAddModal && (
-            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-base font-bold text-white">Add Bookmark</h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleAddBookmark} className="flex flex-col gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Title</label>
-                    <input
-                      type="text"
-                      required
-                      autoFocus
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="e.g. Linear, GitHub..."
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">URL</label>
-                    <input
-                      type="text"
-                      required
-                      value={newUrl}
-                      onChange={(e) => setNewUrl(e.target.value)}
-                      placeholder="e.g. linear.app"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Category</label>
-                    <select
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500"
-                    >
-                      <option value="Dev">Dev</option>
-                      <option value="Social">Social</option>
-                      <option value="Tools">Tools</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddModal(false)}
-                      className="px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
-                    >
-                      Save Bookmark
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Footer */}
-          <footer className="text-center text-xs text-slate-600 font-mono mt-auto pt-6">
-            <span>{bookmarks.length} Bookmarks active</span>
-          </footer>
-        </div>
-      )
-    }
-
-    createRoot(document.getElementById('root')).render(<LinksApp />)
   </script>
 </body>
 </html>

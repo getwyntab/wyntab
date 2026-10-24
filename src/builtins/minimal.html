@@ -28,187 +28,118 @@
     </div>
   </div>
 
-  <script type="text/babel" data-type="module" data-presets="react">
-    import React, { useState, useEffect, useRef } from 'react'
-    import { createRoot } from 'react-dom/client'
-    import { Search, Check, Sparkles, Command, ArrowRight } from 'lucide-react'
-
-    function MinimalApp() {
-      const [timeStr, setTimeStr] = useState('')
-      const [dateStr, setDateStr] = useState('')
-      const [greeting, setGreeting] = useState('')
-      const [searchQuery, setSearchQuery] = useState('')
-      const [focusTask, setFocusTask] = useState('')
-      const [taskDone, setTaskDone] = useState(false)
-      const [isEditingTask, setIsEditingTask] = useState(false)
-      const searchInputRef = useRef(null)
-
-      // Time & greeting updater
-      useEffect(() => {
+  <script type="module">
+import React, { useState, useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Search, Check, Sparkles, Command, ArrowRight } from 'lucide-react';
+function MinimalApp() {
+    const [timeStr, setTimeStr] = useState('');
+    const [dateStr, setDateStr] = useState('');
+    const [greeting, setGreeting] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [focusTask, setFocusTask] = useState('');
+    const [taskDone, setTaskDone] = useState(false);
+    const [isEditingTask, setIsEditingTask] = useState(false);
+    const searchInputRef = useRef(null);
+    // Time & greeting updater
+    useEffect(() => {
         const update = () => {
-          const now = new Date()
-          setTimeStr(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }))
-          setDateStr(now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }))
-
-          const hr = now.getHours()
-          if (hr < 12) setGreeting('Good morning')
-          else if (hr < 18) setGreeting('Good afternoon')
-          else setGreeting('Good evening')
-        }
-        update()
-        const timer = setInterval(update, 1000)
-        return () => clearInterval(timer)
-      }, [])
-
-      // Load persisted task from storage
-      useEffect(() => {
+            const now = new Date();
+            setTimeStr(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+            setDateStr(now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }));
+            const hr = now.getHours();
+            if (hr < 12)
+                setGreeting('Good morning');
+            else if (hr < 18)
+                setGreeting('Good afternoon');
+            else
+                setGreeting('Good evening');
+        };
+        update();
+        const timer = setInterval(update, 1000);
+        return () => clearInterval(timer);
+    }, []);
+    // Load persisted task from storage
+    useEffect(() => {
         if (window.wyntab) {
-          window.wyntab.get('minimal_focus').then(v => {
-            if (v && typeof v === 'object') {
-              setFocusTask(v.text || '')
-              setTaskDone(!!v.done)
-            }
-          })
+            window.wyntab.get('minimal_focus').then(v => {
+                if (v && typeof v === 'object') {
+                    setFocusTask(v.text || '');
+                    setTaskDone(!!v.done);
+                }
+            });
         }
-      }, [])
-
-      // Save task to storage
-      const saveFocus = (text, done) => {
-        setFocusTask(text)
-        setTaskDone(done)
+    }, []);
+    // Save task to storage
+    const saveFocus = (text, done) => {
+        setFocusTask(text);
+        setTaskDone(done);
         if (window.wyntab) {
-          window.wyntab.set('minimal_focus', { text, done })
+            window.wyntab.set('minimal_focus', { text, done });
         }
-      }
-
-      // Keyboard shortcut: Cmd/Ctrl + K to focus search
-      useEffect(() => {
+    };
+    // Keyboard shortcut: Cmd/Ctrl + K to focus search
+    useEffect(() => {
         const handleKeyDown = (e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-            e.preventDefault()
-            searchInputRef.current?.focus()
-          }
-        }
-        window.addEventListener('keydown', handleKeyDown)
-        return () => window.removeEventListener('keydown', handleKeyDown)
-      }, [])
-
-      const handleSearchSubmit = (e) => {
-        e.preventDefault()
-        const q = searchQuery.trim()
-        if (!q) return
-
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        const q = searchQuery.trim();
+        if (!q)
+            return;
         if (/^(https?:\/\/|[a-z0-9-]+\.[a-z]{2,})/i.test(q)) {
-          const url = q.startsWith('http') ? q : `https://${q}`
-          window.location.href = url
-        } else {
-          window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`
+            const url = q.startsWith('http') ? q : `https://${q}`;
+            window.location.href = url;
         }
-      }
+        else {
+            window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+        }
+    };
+    return (React.createElement("div", { className: "min-h-screen flex flex-col justify-between p-8 sm:p-12 max-w-4xl mx-auto w-full" },
+        React.createElement("header", { className: "flex items-center justify-between text-xs font-mono text-slate-500" },
+            React.createElement("span", { className: "flex items-center gap-2" },
+                React.createElement(Sparkles, { className: "w-3.5 h-3.5 text-indigo-400" }),
+                React.createElement("span", null, "MINIMAL")),
+            React.createElement("div", { className: "flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400" },
+                React.createElement(Command, { className: "w-3 h-3" }),
+                React.createElement("span", null, "K to search"))),
+        React.createElement("main", { className: "flex flex-col items-center text-center my-auto py-12" },
+            React.createElement("span", { className: "text-sm font-medium text-slate-400 mb-2 tracking-wide" }, greeting),
+            React.createElement("h1", { className: "text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-tighter text-slate-100 font-mono mb-3" }, timeStr || '00:00'),
+            React.createElement("p", { className: "text-sm sm:text-base text-slate-400 font-medium mb-10" }, dateStr),
+            React.createElement("form", { onSubmit: handleSearchSubmit, className: "w-full max-w-lg mb-10" },
+                React.createElement("div", { className: "relative group" },
+                    React.createElement(Search, { className: "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" }),
+                    React.createElement("input", { ref: searchInputRef, type: "text", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), placeholder: "Search the web or paste URL...", className: "w-full pl-11 pr-12 py-3.5 rounded-xl bg-slate-900/90 border border-slate-800/90 focus:border-indigo-500 focus:bg-slate-900 text-slate-100 placeholder-slate-500 text-sm outline-none transition-all shadow-lg" }),
+                    searchQuery && (React.createElement("button", { type: "submit", className: "absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors" },
+                        React.createElement(ArrowRight, { className: "w-3.5 h-3.5" }))))),
+            React.createElement("div", { className: "w-full max-w-md bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between gap-3 text-left backdrop-blur-sm" },
+                React.createElement("button", { type: "button", onClick: () => saveFocus(focusTask, !taskDone), className: `w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${taskDone
+                        ? 'bg-emerald-600 border-emerald-500 text-white'
+                        : 'border-slate-700 hover:border-slate-500 bg-slate-950'}` }, taskDone && React.createElement(Check, { className: "w-3 h-3 stroke-[3]" })),
+                React.createElement("div", { className: "flex-1 min-w-0" },
+                    React.createElement("div", { className: "text-[11px] font-mono uppercase text-slate-500 font-medium" }, "Main Focus Today"),
+                    isEditingTask ? (React.createElement("input", { type: "text", defaultValue: focusTask, autoFocus: true, placeholder: "What is your primary goal?", onBlur: (e) => {
+                            saveFocus(e.target.value, taskDone);
+                            setIsEditingTask(false);
+                        }, onKeyDown: (e) => {
+                            if (e.key === 'Enter') {
+                                saveFocus(e.currentTarget.value, taskDone);
+                                setIsEditingTask(false);
+                            }
+                        }, className: "w-full bg-transparent text-sm text-slate-100 outline-none border-b border-indigo-500 py-0.5" })) : (React.createElement("div", { onClick: () => setIsEditingTask(true), className: `text-sm cursor-pointer truncate transition-colors ${taskDone ? 'line-through text-slate-500' : focusTask ? 'text-slate-200' : 'text-slate-500 italic'}` }, focusTask || 'Click to set main goal...'))))),
+        React.createElement("footer", { className: "text-center text-xs text-slate-600 font-mono" },
+            React.createElement("span", null, "Keep your mind clear. One task at a time."))));
+}
+createRoot(document.getElementById('root')).render(React.createElement(MinimalApp, null));
 
-      return (
-        <div className="min-h-screen flex flex-col justify-between p-8 sm:p-12 max-w-4xl mx-auto w-full">
-          {/* Top Bar */}
-          <header className="flex items-center justify-between text-xs font-mono text-slate-500">
-            <span className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>MINIMAL</span>
-            </span>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400">
-              <Command className="w-3 h-3" />
-              <span>K to search</span>
-            </div>
-          </header>
-
-          {/* Center Core */}
-          <main className="flex flex-col items-center text-center my-auto py-12">
-            <span className="text-sm font-medium text-slate-400 mb-2 tracking-wide">
-              {greeting}
-            </span>
-            <h1 className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-tighter text-slate-100 font-mono mb-3">
-              {timeStr || '00:00'}
-            </h1>
-            <p className="text-sm sm:text-base text-slate-400 font-medium mb-10">
-              {dateStr}
-            </p>
-
-            {/* Quick Search */}
-            <form onSubmit={handleSearchSubmit} className="w-full max-w-lg mb-10">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search the web or paste URL..."
-                  className="w-full pl-11 pr-12 py-3.5 rounded-xl bg-slate-900/90 border border-slate-800/90 focus:border-indigo-500 focus:bg-slate-900 text-slate-100 placeholder-slate-500 text-sm outline-none transition-all shadow-lg"
-                />
-                {searchQuery && (
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </form>
-
-            {/* Focus Task Widget */}
-            <div className="w-full max-w-md bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between gap-3 text-left backdrop-blur-sm">
-              <button
-                type="button"
-                onClick={() => saveFocus(focusTask, !taskDone)}
-                className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
-                  taskDone
-                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                    : 'border-slate-700 hover:border-slate-500 bg-slate-950'
-                }`}
-              >
-                {taskDone && <Check className="w-3 h-3 stroke-[3]" />}
-              </button>
-
-              <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-mono uppercase text-slate-500 font-medium">Main Focus Today</div>
-                {isEditingTask ? (
-                  <input
-                    type="text"
-                    defaultValue={focusTask}
-                    autoFocus
-                    placeholder="What is your primary goal?"
-                    onBlur={(e) => {
-                      saveFocus(e.target.value, taskDone)
-                      setIsEditingTask(false)
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        saveFocus(e.currentTarget.value, taskDone)
-                        setIsEditingTask(false)
-                      }
-                    }}
-                    className="w-full bg-transparent text-sm text-slate-100 outline-none border-b border-indigo-500 py-0.5"
-                  />
-                ) : (
-                  <div
-                    onClick={() => setIsEditingTask(true)}
-                    className={`text-sm cursor-pointer truncate transition-colors ${
-                      taskDone ? 'line-through text-slate-500' : focusTask ? 'text-slate-200' : 'text-slate-500 italic'
-                    }`}
-                  >
-                    {focusTask || 'Click to set main goal...'}
-                  </div>
-                )}
-              </div>
-            </div>
-          </main>
-
-          {/* Bottom Footer */}
-          <footer className="text-center text-xs text-slate-600 font-mono">
-            <span>Keep your mind clear. One task at a time.</span>
-          </footer>
-        </div>
-      )
-    }
-
-    createRoot(document.getElementById('root')).render(<MinimalApp />)
   </script>
 </body>
 </html>

@@ -90,17 +90,12 @@ export function Sidebar({
         <button
           type="button"
           onClick={onToggleTheme}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-md text-[12px] font-medium text-text-muted hover:text-text-primary hover:bg-bg-a4 border border-transparent hover:border-divider-dim transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[12px] font-medium text-text-muted hover:text-text-primary hover:bg-bg-a4 border border-transparent hover:border-divider-dim transition-colors"
           title="Toggle Dark / Light Theme"
           aria-label="Toggle Theme"
         >
-          <span className="flex items-center gap-2">
-            {darkMode ? <Moon size={15} className="text-accent-bright" /> : <Sun size={15} className="text-accent-main" />}
-            <span>{darkMode ? "Dark Mode" : "Light Mode"}</span>
-          </span>
-          <span className="text-[10px] uppercase font-mono tracking-wider text-text-subtle">
-            {darkMode ? "Dark" : "Light"}
-          </span>
+          {darkMode ? <Moon size={15} className="text-accent-bright" /> : <Sun size={15} className="text-accent-main" />}
+          <span>{darkMode ? "Dark Mode" : "Light Mode"}</span>
         </button>
       </div>
     </aside>

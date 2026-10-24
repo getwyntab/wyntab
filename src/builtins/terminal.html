@@ -56,8 +56,8 @@
 
       // Load persisted theme
       useEffect(() => {
-        if (window.wyn) {
-          window.wyn.get('terminal_theme').then(saved => {
+        if (window.wyntab) {
+          window.wyntab.get('terminal_theme').then(saved => {
             if (saved && THEMES[saved]) setThemeKey(saved)
           })
         }
@@ -71,7 +71,7 @@
       const handleThemeChange = (newTheme) => {
         if (THEMES[newTheme]) {
           setThemeKey(newTheme)
-          if (window.wyn) window.wyn.set('terminal_theme', newTheme)
+          if (window.wyntab) window.wyntab.set('terminal_theme', newTheme)
           return `Theme switched to "${newTheme}".`
         }
         return `Unknown theme: "${newTheme}". Available: default, green, amber, cyan.`

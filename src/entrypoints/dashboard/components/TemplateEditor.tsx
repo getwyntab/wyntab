@@ -64,11 +64,11 @@ export function TemplateEditor({
     setRenderKey((k) => k + 1)
   }, [debouncedHtml, previewKey])
 
-  // wyn storage bridge in editor preview
+  // wyntab storage bridge in editor preview
   useEffect(() => {
     const handleMessage = async (e: MessageEvent) => {
       const iframe = previewIframeRef.current
-      if (!iframe || e.source !== iframe.contentWindow || !e.data?.wyn) return
+      if (!iframe || e.source !== iframe.contentWindow || !e.data?.wyntab) return
       const { id, op, key, value } = e.data
       const k = `tpl:preview:${template.id}:${key}`
       let result: any

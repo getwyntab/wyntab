@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html style="background-color: transparent !important;">
+<html style="background-color: #090909 !important; color-scheme: dark;">
 <head>
 <meta charset="utf-8">
-<style>html, body { background-color: transparent !important; margin: 0; padding: 0; }</style>
+<meta name="color-scheme" content="dark">
+<style>html, body { background-color: #090909 !important; color-scheme: dark; margin: 0; padding: 0; }</style>
 </head>
-<body style="background-color: transparent !important; margin: 0; padding: 0;">
+<body style="background-color: #090909 !important; color-scheme: dark; margin: 0; padding: 0;">
 <script>
 const CDN = 'https://esm.sh/';
 const BASE = {
@@ -23,9 +24,9 @@ const bridge = () => {
   });
   const call = (op, key, value) => new Promise((r) => {
     pending[++id] = r;
-    parent.postMessage({ wyn: true, id, op, key, value }, '*');
+    parent.postMessage({ wyntab: true, id, op, key, value }, '*');
   });
-  window.wyn = {
+  window.wyntab = {
     get: (k) => call('get', k),
     set: (k, v) => call('set', k, v),
     remove: (k) => call('remove', k),
@@ -64,6 +65,8 @@ addEventListener('message', (e) => {
   }
 
   const head =
+    `<meta name="color-scheme" content="dark">` +
+    `<style>html, body { background-color: #090909; color-scheme: dark; }</style>` +
     `<script>(${bridge})()<\/script>` +
     `<script type="importmap">${JSON.stringify({ imports: map })}<\/script>` +
     (/text\/babel/.test(html)

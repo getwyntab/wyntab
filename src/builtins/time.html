@@ -61,8 +61,8 @@
 
       // Load format preference
       useEffect(() => {
-        if (window.wyn) {
-          window.wyn.get('time_is12h').then(val => {
+        if (window.wyntab) {
+          window.wyntab.get('time_is12h').then(val => {
             if (typeof val === 'boolean') setIs12h(val)
           })
         }
@@ -71,7 +71,7 @@
       const toggleFormat = () => {
         const next = !is12h
         setIs12h(next)
-        if (window.wyn) window.wyn.set('time_is12h', next)
+        if (window.wyntab) window.wyntab.set('time_is12h', next)
       }
 
       // Format local time

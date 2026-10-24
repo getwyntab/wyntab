@@ -37,13 +37,13 @@ function useDarkMode() {
   const [dark, setDark] = useState(() => {
     return document.documentElement.classList.contains('dark') ||
       document.documentElement.getAttribute('data-theme') === 'dark' ||
-      localStorage.getItem('wyn-dashboard-theme') === 'dark'
+      localStorage.getItem('wyntab-dashboard-theme') === 'dark'
   })
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
-    localStorage.setItem('wyn-dashboard-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('wyntab-dashboard-theme', dark ? 'dark' : 'light')
   }, [dark])
 
   return [dark, setDark] as const

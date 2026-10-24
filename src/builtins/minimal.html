@@ -62,8 +62,8 @@
 
       // Load persisted task from storage
       useEffect(() => {
-        if (window.wyn) {
-          window.wyn.get('minimal_focus').then(v => {
+        if (window.wyntab) {
+          window.wyntab.get('minimal_focus').then(v => {
             if (v && typeof v === 'object') {
               setFocusTask(v.text || '')
               setTaskDone(!!v.done)
@@ -76,8 +76,8 @@
       const saveFocus = (text, done) => {
         setFocusTask(text)
         setTaskDone(done)
-        if (window.wyn) {
-          window.wyn.set('minimal_focus', { text, done })
+        if (window.wyntab) {
+          window.wyntab.set('minimal_focus', { text, done })
         }
       }
 

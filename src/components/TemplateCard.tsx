@@ -1,9 +1,81 @@
+import { useState, useEffect, useRef } from 'react'
 import { Code2, Copy, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type Template } from '@/lib/templates'
 
+// ─── Thumbnail Skeleton ────────────────────────────────────────────────────────
+export function ThumbnailSkeleton() {
+  return (
+    <div
+      data-testid="thumbnail-skeleton"
+      className="absolute inset-0 w-full h-full bg-bg-b1 flex flex-col items-center justify-center p-4 overflow-hidden select-none"
+    >
+      {/* Wireframe Placeholders for clean NewTab page */}
+      <div className="w-16 h-3.5 rounded bg-bg-a3 mb-1.5" />
+      <div className="w-10 h-1.5 rounded-full bg-bg-a2 mb-3.5" />
+      <div className="w-32 h-4 rounded-full bg-bg-a2 border border-divider-dim/60 mb-2.5" />
+      <div className="flex gap-1.5">
+        <div className="w-3.5 h-3.5 rounded bg-bg-a3/80" />
+        <div className="w-3.5 h-3.5 rounded bg-bg-a3/80" />
+        <div className="w-3.5 h-3.5 rounded bg-bg-a3/80" />
+      </div>
+
+      {/* Smooth YouTube-like Shimmer Sweep */}
+      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/[0.06] to-transparent pointer-events-none" />
+    </div>
+  )
+}
+
+// ─── Template Card Skeleton ───────────────────────────────────────────────────
+export function TemplateCardSkeleton() {
+  return (
+    <div
+      data-testid="template-card-skeleton"
+      className="bg-bg-a2/40 border border-divider-dim rounded-md flex flex-col justify-between overflow-hidden w-full shadow-xs select-none"
+    >
+      <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-b1 border-b border-divider-dim">
+        <ThumbnailSkeleton />
+      </div>
+      <div className="p-3 pb-2 flex items-center justify-between gap-2">
+        <div className="w-28 h-4 rounded bg-bg-a3" />
+        <div className="w-12 h-3.5 rounded bg-bg-a3" />
+      </div>
+      <div className="px-3 py-2 border-t border-divider-dim flex items-center justify-between bg-bg-a2/40">
+        <div className="w-14 h-4 rounded bg-bg-a3" />
+        <div className="flex gap-1.5">
+          <div className="w-5 h-5 rounded bg-bg-a3" />
+          <div className="w-5 h-5 rounded bg-bg-a3" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Thumbnail Preview ─────────────────────────────────────────────────────────
 function Thumbnail({ html }: { html?: string }) {
+  const [loaded, setLoaded] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => {
+    setLoaded(false)
+    const handleMessage = (e: MessageEvent) => {
+      if (e.source === iframeRef.current?.contentWindow && e.data?.type === 'PREVIEW_LOADED') {
+        setLoaded(true)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+
+    // Safety fallback: reveal after 1.8s even if network/offline
+    const timer = setTimeout(() => {
+      setLoaded(true)
+    }, 1800)
+
+    return () => {
+      window.removeEventListener('message', handleMessage)
+      clearTimeout(timer)
+    }
+  }, [html])
+
   if (!html) {
     return (
       <div className="flex h-full w-full items-center justify-center text-text-muted text-[12px]">
@@ -19,8 +91,20 @@ function Thumbnail({ html }: { html?: string }) {
   const styledHtml = `<style>html, body { overflow: hidden !important; scrollbar-width: none !important; -ms-overflow-style: none !important; pointer-events: none !important; cursor: default !important; user-select: none !important; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }</style>${html}`
 
   return (
-    <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-b2 border-b border-divider-dim">
+    <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-b1 border-b border-divider-dim">
+      {/* Skeleton screen cross-fades out when ready */}
+      <div
+        className={cn(
+          "absolute inset-0 transition-opacity duration-300 pointer-events-none",
+          loaded ? "opacity-0" : "opacity-100"
+        )}
+      >
+        <ThumbnailSkeleton />
+      </div>
+
+      {/* Sandboxed iframe cross-fades in once loaded */}
       <iframe
+        ref={iframeRef}
         key={html}
         src={sandboxUrl}
         onLoad={(e) => {
@@ -35,8 +119,12 @@ function Thumbnail({ html }: { html?: string }) {
           height: '400%',
           transform: 'scale(0.25)',
           transformOrigin: '0 0',
+          backgroundColor: 'transparent',
         }}
-        className="absolute inset-0 pointer-events-none border-none select-none"
+        className={cn(
+          "absolute inset-0 pointer-events-none border-none select-none transition-opacity duration-300 ease-out",
+          loaded ? "opacity-100" : "opacity-0"
+        )}
         title="Template preview thumbnail"
         sandbox="allow-scripts allow-forms allow-popups allow-modals"
       />

@@ -13,7 +13,7 @@ function GithubIcon({ className = "w-3 h-3" }: { className?: string }) {
   )
 }
 
-export function AboutPage({ version = '0.5.4' }: AboutPageProps) {
+export function AboutPage({ version = '0.5.5' }: AboutPageProps) {
   return (
     <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full space-y-8 select-none">
       {/* Brand Header */}
@@ -43,40 +43,40 @@ export function AboutPage({ version = '0.5.4' }: AboutPageProps) {
       </div>
 
       {/* Runtime Environment Specs */}
-      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-3">
-        <div className="flex items-center gap-2 text-text-primary font-semibold text-[14px]">
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-4">
+        <div className="flex items-center gap-2.5">
           <Cpu size={16} className="text-accent-main" />
-          <span>Extension Specifications</span>
+          <h3 className="text-[14px] font-semibold text-text-primary">Extension Specifications</h3>
         </div>
         <div className="divide-y divide-divider-dim text-[12px]">
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Manifest Specification</span>
-            <span className="font-mono text-text-primary">Manifest V3</span>
+            <span className="font-mono text-accent-bright/75">Manifest V3</span>
           </div>
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Extension Framework</span>
-            <span className="font-mono text-text-primary">WXT 0.21 · Vite · React 19</span>
+            <span className="font-mono text-accent-bright/75">WXT 0.21 · Vite · React 19</span>
           </div>
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Code Editor Engine</span>
-            <span className="font-mono text-text-primary">CodeMirror 6</span>
+            <span className="font-mono text-accent-bright/75">CodeMirror 6</span>
           </div>
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Target Runtime</span>
-            <span className="font-mono text-text-primary">Chromium & Gecko Browsers</span>
+            <span className="font-mono text-accent-bright/75">Chromium & Gecko Browsers</span>
           </div>
         </div>
       </section>
 
       {/* Security & Sandbox Policy */}
-      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 flex items-start gap-3">
-        <ShieldCheck size={18} className="text-accent-bright shrink-0 mt-0.5" />
-        <div className="text-[12px] space-y-1">
-          <h4 className="font-semibold text-text-primary">Security & Sandbox Policy</h4>
-          <p className="text-text-muted leading-relaxed">
-            All user-authored and uploaded HTML templates execute inside an isolated browser iframe with strict Content Security Policy, completely isolated from extension privileged APIs. External scripts, unauthorized embeds, and arbitrary network script injection are stripped by DOM sanitization upon save to guarantee complete browser privacy and security.
-          </p>
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-4">
+        <div className="flex items-center gap-2.5">
+          <ShieldCheck size={16} className="text-accent-main" />
+          <h3 className="text-[14px] font-semibold text-text-primary">Security & Sandbox Policy</h3>
         </div>
+        <p className="text-[12px] text-text-muted leading-relaxed">
+          All user-authored and uploaded HTML templates execute inside an isolated browser sandbox iframe with strict Content Security Policy, completely isolated from extension privileged APIs. External scripts, React/Vue modules, and CDN packages run safely without exposing browser or extension credentials to guarantee complete privacy and security.
+        </p>
       </section>
     </div>
   )

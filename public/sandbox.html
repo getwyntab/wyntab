@@ -1,5 +1,10 @@
 <!DOCTYPE html>
+<html style="background-color: transparent !important;">
+<head>
 <meta charset="utf-8">
+<style>html, body { background-color: transparent !important; margin: 0; padding: 0; }</style>
+</head>
+<body style="background-color: transparent !important; margin: 0; padding: 0;">
 <script>
 const CDN = 'https://esm.sh/';
 const BASE = {
@@ -25,6 +30,17 @@ const bridge = () => {
     set: (k, v) => call('set', k, v),
     remove: (k) => call('remove', k),
   };
+
+  const notify = () => {
+    setTimeout(() => {
+      parent.postMessage({ type: 'PREVIEW_LOADED' }, '*');
+    }, 120);
+  };
+  if (document.readyState === 'complete') {
+    notify();
+  } else {
+    addEventListener('load', notify);
+  }
 };
 
 addEventListener('message', (e) => {
@@ -64,4 +80,5 @@ addEventListener('message', (e) => {
   document.open(); document.write(html); document.close();
 });
 </script>
-
+</body>
+</html>

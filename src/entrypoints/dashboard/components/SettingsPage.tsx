@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Download, FileUp, Database } from 'lucide-react'
+import { Download, FileUp, Database, HardDrive } from 'lucide-react'
 
 interface SettingsPageProps {
   customCount: number
@@ -74,24 +74,26 @@ export function SettingsPage({
       </section>
 
       {/* Section 2: Storage Diagnostics */}
-      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-3">
-        <h3 className="text-[14px] font-semibold text-text-primary">Storage Diagnostics</h3>
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 space-y-4">
+        <div className="flex items-center gap-2.5">
+          <HardDrive size={16} className="text-accent-main" />
+          <h3 className="text-[14px] font-semibold text-text-primary">Storage Diagnostics</h3>
+        </div>
         <div className="divide-y divide-divider-dim text-[12px]">
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Custom Templates Installed</span>
-            <span className="font-mono text-text-primary font-semibold">{customCount}</span>
+            <span className="font-mono text-accent-bright/75">{customCount}</span>
           </div>
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Storage Driver</span>
-            <span className="font-mono text-text-primary">IndexedDB / browser.storage.local</span>
+            <span className="font-mono text-accent-bright/75">browser.storage.local</span>
           </div>
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-text-muted">Storage Capacity</span>
-            <span className="font-mono text-accent-bright font-medium">Unlimited (unlimitedStorage permission)</span>
+            <span className="font-mono text-accent-bright/75">Unlimited (unlimitedStorage permission)</span>
           </div>
         </div>
       </section>
     </div>
   )
 }
-

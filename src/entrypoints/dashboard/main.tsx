@@ -8,7 +8,7 @@ import { STARTER_HTML } from '@/lib/constants'
 // Modular Components
 import { Sidebar, type DashboardNav } from './components/Sidebar'
 import { TemplatesToolbar, type TemplateFilter, type TemplateSort } from './components/TemplatesToolbar'
-import { TemplateCard } from '@/components/TemplateCard'
+import { TemplateCard, TemplateCardSkeleton } from '@/components/TemplateCard'
 import { TemplateEditor } from './components/TemplateEditor'
 import { SettingsPage } from './components/SettingsPage'
 import { AboutPage } from './components/AboutPage'
@@ -55,6 +55,7 @@ export function Dashboard() {
   const [activeNav, setActiveNav] = useState<DashboardNav>('templates')
   const [activeId, setActiveId] = useState('')
   const [userList, setUserList] = useState<Template[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Filter & Sort
   const [filter, setFilter] = useState<TemplateFilter>('all')
@@ -95,6 +96,8 @@ export function Dashboard() {
       }
     } catch {
       // Fallback for non-extension / mock environments
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -300,7 +303,7 @@ export function Dashboard() {
 
   const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
     ? browser.runtime.getManifest().version
-    : '0.5.4'
+    : '0.5.5'
 
   // ─── VIEW 4: Full-Screen Template Editor ────────────────────────────────────
   if (editingTemplate) {
@@ -387,7 +390,13 @@ export function Dashboard() {
             {/* Template Gallery Canvas */}
             <div className="flex-1 overflow-y-auto p-6">
               <div className="max-w-7xl mx-auto">
-                {visibleTemplates.length > 0 ? (
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <TemplateCardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : visibleTemplates.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {visibleTemplates.map((t) => (
                       <TemplateCard

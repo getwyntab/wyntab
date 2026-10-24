@@ -36,6 +36,7 @@ describe('TemplateCard component', () => {
     expect(screen.getByRole('switch')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /fork to edit/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /duplicate template/i })).toBeInTheDocument()
+    expect(screen.getByTestId('thumbnail-skeleton')).toBeInTheDocument()
   })
 
   it('displays active state badge when template is active', () => {

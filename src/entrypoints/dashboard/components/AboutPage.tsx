@@ -12,7 +12,7 @@ function GithubIcon({ className = "w-3 h-3" }: { className?: string }) {
   )
 }
 
-export function AboutPage({ version = '0.5.2' }: AboutPageProps) {
+export function AboutPage({ version = '0.5.3' }: AboutPageProps) {
   return (
     <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full space-y-8 select-none">
       {/* Brand Header */}

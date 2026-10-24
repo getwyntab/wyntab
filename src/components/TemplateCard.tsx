@@ -12,12 +12,20 @@ function Thumbnail({ html }: { html?: string }) {
     )
   }
 
-  const styledHtml = `<style>html, body { overflow: hidden !important; pointer-events: none !important; cursor: default !important; user-select: none !important; }</style>${html}`
+  const sandboxUrl = typeof browser !== 'undefined' && browser.runtime?.getURL
+    ? browser.runtime.getURL('/sandbox.html')
+    : '/sandbox.html'
+
+  const styledHtml = `<style>html, body { overflow: hidden !important; scrollbar-width: none !important; -ms-overflow-style: none !important; pointer-events: none !important; cursor: default !important; user-select: none !important; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }</style>${html}`
 
   return (
     <div className="relative aspect-16/10 w-full overflow-hidden bg-bg-b2 border-b border-divider-dim">
       <iframe
-        srcDoc={styledHtml}
+        key={html}
+        src={sandboxUrl}
+        onLoad={(e) => {
+          e.currentTarget.contentWindow?.postMessage({ type: 'RUN', html: styledHtml }, '*')
+        }}
         scrolling="no"
         loading="lazy"
         tabIndex={-1}
@@ -30,7 +38,7 @@ function Thumbnail({ html }: { html?: string }) {
         }}
         className="absolute inset-0 pointer-events-none border-none select-none"
         title="Template preview thumbnail"
-        sandbox=""
+        sandbox="allow-scripts allow-forms allow-popups allow-modals"
       />
     </div>
   )
@@ -129,17 +137,17 @@ export function TemplateCard({
             "text-[11px] font-medium leading-none",
             isActive ? "text-accent-bright font-semibold" : "text-text-muted"
           )}>
-            {isActive ? "Active" : "Activate"}
+            {isActive ? 'Active' : 'Activate'}
           </span>
         </button>
 
-        {/* Right: Violentmonkey Icon Actions (< / >, Copy, Trash) */}
-        <div className="flex items-center gap-1 text-text-muted">
+        {/* Right: Operational Icon Actions (Edit, Duplicate, Delete) */}
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={onEditCode}
-            className="h-7 w-7 rounded flex items-center justify-center hover:text-text-primary hover:bg-bg-a4 transition-colors"
-            title={template.isBuiltin ? "Fork to edit" : "Edit code"}
+            className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-a4 transition-colors"
+            title={template.isBuiltin ? "Fork to Edit Code" : "Edit Code"}
             aria-label={template.isBuiltin ? "Fork to edit" : "Edit code"}
           >
             <Code2 size={14} />
@@ -148,22 +156,22 @@ export function TemplateCard({
           <button
             type="button"
             onClick={onDuplicate}
-            className="h-7 w-7 rounded flex items-center justify-center hover:text-text-primary hover:bg-bg-a4 transition-colors"
-            title="Duplicate template"
+            className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-a4 transition-colors"
+            title="Duplicate Template"
             aria-label="Duplicate template"
           >
-            <Copy size={13} />
+            <Copy size={14} />
           </button>
 
           {!template.isBuiltin && onDelete && (
             <button
               type="button"
               onClick={onDelete}
-              className="h-7 w-7 rounded flex items-center justify-center text-text-muted hover:text-danger-main hover:bg-danger-bg transition-colors"
-              title="Delete template"
+              className="p-1 rounded text-text-muted hover:text-danger-main hover:bg-danger-bg transition-colors"
+              title="Delete Template"
               aria-label="Delete template"
             >
-              <Trash2 size={13} />
+              <Trash2 size={14} />
             </button>
           )}
         </div>

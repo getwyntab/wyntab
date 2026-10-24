@@ -300,7 +300,7 @@ export function Dashboard() {
 
   const manifestVersion = typeof browser !== 'undefined' && browser.runtime?.getManifest
     ? browser.runtime.getManifest().version
-    : '0.5.2'
+    : '0.5.3'
 
   // ─── VIEW 4: Full-Screen Template Editor ────────────────────────────────────
   if (editingTemplate) {

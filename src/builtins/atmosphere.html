@@ -1,66 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atmosphere - WYNTab</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: white;
-        }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .content {
-            text-align: center;
-            backdrop-filter: blur(10px);
-            padding: 4rem;
-            border-radius: 40px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 300;
-            letter-spacing: 0.4em;
-            margin: 0;
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-        .divider {
-            width: 40px;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.2);
-            margin: 2rem auto;
-        }
-        p {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            opacity: 0.4;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atmosphere - WYNTab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #0f172a 100%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+  </style>
 </head>
-<body>
-    <div class="content">
-        <h1>Breathe</h1>
-        <div class="divider"></div>
-        <p>A New Moment</p>
+<body class="h-screen w-screen flex flex-col justify-between p-6 sm:p-8 overflow-hidden selection:bg-indigo-500/30 selection:text-white">
+  <div id="root" class="h-full w-full flex flex-col justify-between overflow-hidden">
+    <!-- Static fallback for dashboard thumbnail -->
+    <div class="h-full w-full flex flex-col items-center justify-center p-6 text-center">
+      <div class="w-36 h-36 rounded-full border border-indigo-500/30 bg-indigo-500/10 flex items-center justify-center mb-6">
+        <span class="text-sm font-medium tracking-widest uppercase text-indigo-300">Breathe</span>
+      </div>
+      <div class="text-xs uppercase tracking-widest text-slate-500 font-mono">Atmosphere</div>
     </div>
+  </div>
+
+  <script type="text/babel" data-type="module" data-presets="react">
+    import React, { useState, useEffect, useRef } from 'react'
+    import { createRoot } from 'react-dom/client'
+    import { Wind, Volume2, VolumeX, Sparkles, RotateCcw } from 'lucide-react'
+
+    const PATTERNS = {
+      box: { name: 'Box (4-4-4-4)', phases: [{ name: 'Inhale', dur: 4 }, { name: 'Hold', dur: 4 }, { name: 'Exhale', dur: 4 }, { name: 'Hold', dur: 4 }] },
+      relax: { name: '4-7-8 Relax', phases: [{ name: 'Inhale', dur: 4 }, { name: 'Hold', dur: 7 }, { name: 'Exhale', dur: 8 }] },
+    }
+
+    function AtmosphereApp() {
+      const [patternKey, setPatternKey] = useState('box')
+      const [phaseIndex, setPhaseIndex] = useState(0)
+      const [secondsLeft, setSecondsLeft] = useState(4)
+      const [cycles, setCycles] = useState(0)
+      const [isAudioOn, setIsAudioOn] = useState(false)
+      const audioCtxRef = useRef(null)
+      const gainNodeRef = useRef(null)
+
+      const activePattern = PATTERNS[patternKey]
+      const currentPhase = activePattern.phases[phaseIndex]
+
+      // Web Audio API ambient noise generator (ocean/pink noise)
+      const toggleAudio = () => {
+        if (!isAudioOn) {
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)()
+            audioCtxRef.current = ctx
+
+            const bufferSize = ctx.sampleRate * 2
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+            const output = buffer.getChannelData(0)
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
+            for (let i = 0; i < bufferSize; i++) {
+              const white = Math.random() * 2 - 1
+              b0 = 0.99886 * b0 + white * 0.0555179
+              b1 = 0.99332 * b1 + white * 0.0750759
+              b2 = 0.96900 * b2 + white * 0.1538520
+              b3 = 0.86650 * b3 + white * 0.3104856
+              b4 = 0.55000 * b4 + white * 0.5329522
+              b5 = -0.7616 * b5 - white * 0.0168980
+              output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.04
+              b6 = white * 0.115926
+            }
+
+            const whiteNoise = ctx.createBufferSource()
+            whiteNoise.buffer = buffer
+            whiteNoise.loop = true
+
+            const filter = ctx.createBiquadFilter()
+            filter.type = 'lowpass'
+            filter.frequency.setValueAtTime(400, ctx.currentTime)
+
+            const gain = ctx.createGain()
+            gain.gain.setValueAtTime(0.12, ctx.currentTime)
+            gainNodeRef.current = gain
+
+            whiteNoise.connect(filter)
+            filter.connect(gain)
+            gain.connect(ctx.destination)
+            whiteNoise.start()
+
+            setIsAudioOn(true)
+          } catch (e) {
+            console.error('Audio init error:', e)
+          }
+        } else {
+          audioCtxRef.current?.close()
+          audioCtxRef.current = null
+          setIsAudioOn(false)
+        }
+      }
+
+      // Breathing Cycle Timer
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setSecondsLeft(prev => {
+            if (prev <= 1) {
+              setPhaseIndex(curPhase => {
+                const nextPhase = (curPhase + 1) % activePattern.phases.length
+                if (nextPhase === 0) {
+                  setCycles(c => c + 1)
+                }
+                return nextPhase
+              })
+              return activePattern.phases[(phaseIndex + 1) % activePattern.phases.length].dur
+            }
+            return prev - 1
+          })
+        }, 1000)
+
+        return () => clearInterval(timer)
+      }, [phaseIndex, activePattern])
+
+      // Scale calculation based on phase
+      const isExpanding = currentPhase.name === 'Inhale'
+      const isExhaling = currentPhase.name === 'Exhale'
+      const scaleClass = isExpanding ? 'scale-115' : isExhaling ? 'scale-90' : 'scale-105'
+
+      return (
+        <div className="h-full w-full flex flex-col justify-between max-w-4xl mx-auto overflow-hidden">
+          {/* Header */}
+          <header className="flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <span className="font-semibold uppercase tracking-wider text-slate-300">ATMOSPHERE</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center p-1 bg-slate-900/80 border border-slate-800 rounded-xl text-xs">
+                {Object.keys(PATTERNS).map(key => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setPatternKey(key)
+                      setPhaseIndex(0)
+                      setSecondsLeft(PATTERNS[key].phases[0].dur)
+                    }}
+                    className={`px-3 py-1 rounded-lg font-medium transition-colors ${
+                      patternKey === key ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {PATTERNS[key].name}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleAudio}
+                className={`p-2 rounded-xl border transition-colors ${
+                  isAudioOn
+                    ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-400'
+                    : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+                title={isAudioOn ? 'Mute ambient sound' : 'Play calming ambient sound'}
+              >
+                {isAudioOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
+            </div>
+          </header>
+
+          {/* Central Breathing Orb */}
+          <main className="my-auto flex flex-col items-center justify-center text-center py-6 overflow-hidden">
+            <div className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72 mb-6">
+              {/* Ambient Glow Ring */}
+              <div
+                className={`absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-500/20 via-sky-500/20 to-teal-500/20 blur-xl transition-transform duration-1000 ease-in-out ${scaleClass}`}
+              />
+
+              {/* Middle Pulsing Ring */}
+              <div
+                className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border border-indigo-500/30 bg-slate-900/40 backdrop-blur-md flex flex-col items-center justify-center transition-all duration-1000 ease-in-out shadow-2xl ${scaleClass}`}
+              >
+                <span className="text-xs uppercase font-mono tracking-widest text-indigo-400 mb-2">
+                  {currentPhase.name}
+                </span>
+                <span className="text-5xl sm:text-6xl font-extrabold font-mono tracking-tighter text-white">
+                  {secondsLeft}
+                </span>
+                <span className="text-[11px] text-slate-500 font-mono mt-1">
+                  seconds
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm font-medium text-slate-400 tracking-wide max-w-sm px-4">
+              Inhale peace, exhale tension. Let your mind settle naturally.
+            </p>
+          </main>
+
+          {/* Footer Metrics */}
+          <footer className="flex items-center justify-between text-xs font-mono text-slate-500 border-t border-slate-800/60 pt-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Cycles completed: {cycles}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setCycles(0); setPhaseIndex(0); setSecondsLeft(activePattern.phases[0].dur); }}
+              className="flex items-center gap-1 hover:text-slate-300 transition-colors"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
+          </footer>
+        </div>
+      )
+    }
+
+    createRoot(document.getElementById('root')).render(<AtmosphereApp />)
+  </script>
 </body>
 </html>

@@ -58,19 +58,10 @@ export function TemplateEditor({
   }, [code])
 
   const previewIframeRef = useRef<HTMLIFrameElement>(null)
+  const [renderKey, setRenderKey] = useState(0)
 
-  // Reload sandbox runner when code debounces or restarts
   useEffect(() => {
-    const iframe = previewIframeRef.current
-    if (!iframe) return
-    const handleLoad = () => {
-      iframe.contentWindow?.postMessage({ type: 'RUN', html: debouncedHtml }, '*')
-    }
-    iframe.addEventListener('load', handleLoad, { once: true })
-    const sandboxUrl = typeof browser !== 'undefined' && browser.runtime?.getURL
-      ? browser.runtime.getURL('/sandbox.html')
-      : '/sandbox.html'
-    iframe.src = sandboxUrl
+    setRenderKey((k) => k + 1)
   }, [debouncedHtml, previewKey])
 
   // wyn storage bridge in editor preview
@@ -375,7 +366,12 @@ export function TemplateEditor({
           {/* Sandboxed Iframe (pointer-events disabled during resize drag) */}
           <div className="flex-1 w-full h-full bg-bg-b2 overflow-hidden relative">
             <iframe
+              key={renderKey}
               ref={previewIframeRef}
+              src={typeof browser !== 'undefined' && browser.runtime?.getURL ? browser.runtime.getURL('/sandbox.html') : '/sandbox.html'}
+              onLoad={(e) => {
+                e.currentTarget.contentWindow?.postMessage({ type: 'RUN', html: debouncedHtml }, '*')
+              }}
               className={cn(
                 "w-full h-full border-none bg-black",
                 isDragging && "pointer-events-none"

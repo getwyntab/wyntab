@@ -1,110 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Links - WYNTab</title>
-    <style>
-        :root {
-            --bg: #0a0a0a;
-            --card: #141414;
-            --border: #262626;
-            --text: #ffffff;
-            --text-dim: #737373;
-            --accent: #ffffff;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            width: 90%;
-            max-width: 900px;
-        }
-        .link {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2.5rem 1.5rem;
-            text-decoration: none;
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
-            text-align: center;
-        }
-        .link:hover {
-            transform: translateY(-8px);
-            background: #1a1a1a;
-            border-color: #404040;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .link .icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        .link .name {
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            opacity: 0.8;
-        }
-        .link .url {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            margin-top: 0.5rem;
-            font-weight: 500;
-        }
-        @media (max-width: 640px) {
-            .grid { grid-template-columns: repeat(2, 1fr); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Links - WYNTab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #090a0f;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
 </head>
-<body>
-    <div class="grid">
-        <a href="https://github.com" target="_blank" class="link">
-            <div class="icon">💻</div>
-            <div class="name">GitHub</div>
-            <div class="url">github.com</div>
-        </a>
-        <a href="https://youtube.com" target="_blank" class="link">
-            <div class="icon">📺</div>
-            <div class="name">YouTube</div>
-            <div class="url">youtube.com</div>
-        </a>
-        <a href="https://gmail.com" target="_blank" class="link">
-            <div class="icon">✉️</div>
-            <div class="name">Gmail</div>
-            <div class="url">mail.google.com</div>
-        </a>
-        <a href="https://reddit.com" target="_blank" class="link">
-            <div class="icon">💬</div>
-            <div class="name">Reddit</div>
-            <div class="url">reddit.com</div>
-        </a>
-        <a href="https://twitter.com" target="_blank" class="link">
-            <div class="icon">🐦</div>
-            <div class="name">Twitter</div>
-            <div class="url">twitter.com</div>
-        </a>
-        <a href="https://news.ycombinator.com" target="_blank" class="link">
-            <div class="icon">🍊</div>
-            <div class="name">Hacker News</div>
-            <div class="url">ycombinator.com</div>
-        </a>
+<body class="bg-[#090a0f] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-slate-700 selection:text-white">
+  <div id="root">
+    <!-- Static fallback for dashboard thumbnail -->
+    <div class="min-h-screen p-8 max-w-5xl mx-auto flex flex-col justify-center">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {['GitHub', 'MDN Web Docs', 'Reddit', 'YouTube', 'Figma', 'Vercel'].map(name => (
+          <div key={name} class="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <span class="font-semibold text-sm text-slate-200">{name}</span>
+          </div>
+        ))}
+      </div>
     </div>
+  </div>
+
+  <script type="text/babel" data-type="module" data-presets="react">
+    import React, { useState, useEffect } from 'react'
+    import { createRoot } from 'react-dom/client'
+    import { Search, Plus, Trash2, ExternalLink, Globe, Compass, Code, Share2, Wrench, X } from 'lucide-react'
+
+    const DEFAULT_BOOKMARKS = [
+      { id: '1', title: 'GitHub', url: 'https://github.com', category: 'Dev', icon: 'Code' },
+      { id: '2', title: 'MDN Web Docs', url: 'https://developer.mozilla.org', category: 'Dev', icon: 'Code' },
+      { id: '3', title: 'Reddit', url: 'https://reddit.com', category: 'Social', icon: 'Share2' },
+      { id: '4', title: 'YouTube', url: 'https://youtube.com', category: 'Social', icon: 'Share2' },
+      { id: '5', title: 'Figma', url: 'https://figma.com', category: 'Tools', icon: 'Wrench' },
+      { id: '6', title: 'Vercel', url: 'https://vercel.com', category: 'Tools', icon: 'Wrench' },
+    ]
+
+    function LinksApp() {
+      const [bookmarks, setBookmarks] = useState(DEFAULT_BOOKMARKS)
+      const [searchQuery, setSearchQuery] = useState('')
+      const [selectedCategory, setSelectedCategory] = useState('All')
+      const [showAddModal, setShowAddModal] = useState(false)
+      const [newTitle, setNewTitle] = useState('')
+      const [newUrl, setNewUrl] = useState('')
+      const [newCategory, setNewCategory] = useState('Dev')
+
+      // Load persisted bookmarks
+      useEffect(() => {
+        if (window.wyn) {
+          window.wyn.get('custom_bookmarks').then(saved => {
+            if (Array.isArray(saved) && saved.length > 0) {
+              setBookmarks(saved)
+            }
+          })
+        }
+      }, [])
+
+      const persistBookmarks = (updated) => {
+        setBookmarks(updated)
+        if (window.wyn) {
+          window.wyn.set('custom_bookmarks', updated)
+        }
+      }
+
+      const handleAddBookmark = (e) => {
+        e.preventDefault()
+        if (!newTitle.trim() || !newUrl.trim()) return
+
+        let url = newUrl.trim()
+        if (!/^https?:\/\//i.test(url)) url = `https://${url}`
+
+        const newItem = {
+          id: Date.now().toString(),
+          title: newTitle.trim(),
+          url,
+          category: newCategory,
+          icon: newCategory === 'Dev' ? 'Code' : newCategory === 'Tools' ? 'Wrench' : 'Share2'
+        }
+
+        persistBookmarks([...bookmarks, newItem])
+        setNewTitle('')
+        setNewUrl('')
+        setShowAddModal(false)
+      }
+
+      const handleDeleteBookmark = (id, e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const updated = bookmarks.filter(b => b.id !== id)
+        persistBookmarks(updated)
+      }
+
+      // Filter logic
+      const filtered = bookmarks.filter(b => {
+        const matchesCategory = selectedCategory === 'All' || b.category === selectedCategory
+        const matchesQuery = b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          b.url.toLowerCase().includes(searchQuery.toLowerCase())
+        return matchesCategory && matchesQuery
+      })
+
+      const categories = ['All', 'Dev', 'Social', 'Tools']
+
+      return (
+        <div className="min-h-screen flex flex-col p-8 sm:p-12 max-w-5xl mx-auto w-full">
+          {/* Top Bar */}
+          <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                <Compass className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-slate-100">Bookmarks</h1>
+                <p className="text-xs text-slate-500">Quick launch command center</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Search Bar */}
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter links..."
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-500 text-xs outline-none focus:border-indigo-500 transition-colors"
+                />
+              </div>
+
+              {/* Add Link Button */}
+              <button
+                type="button"
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shrink-0 shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Category Tabs */}
+          <div className="flex items-center gap-1 mb-6 border-b border-slate-800 pb-3">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  selectedCategory === cat
+                    ? 'bg-slate-800 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Grid of Links */}
+          <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {filtered.map(b => (
+              <a
+                key={b.id}
+                href={b.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group p-4 rounded-2xl bg-slate-900/70 hover:bg-slate-850 border border-slate-800/80 hover:border-slate-700 flex items-center justify-between transition-all hover:-translate-y-0.5 shadow-sm"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0">
+                    <Globe className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-slate-200 group-hover:text-white truncate">
+                      {b.title}
+                    </div>
+                    <div className="text-[11px] font-mono text-slate-500 truncate">
+                      {b.url.replace(/^https?:\/\//i, '').replace(/\/$/, '')}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteBookmark(b.id, e)}
+                    className="p-1.5 rounded-lg hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 transition-colors"
+                    title="Remove bookmark"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                </div>
+              </a>
+            ))}
+
+            {filtered.length === 0 && (
+              <div className="col-span-full py-16 text-center text-slate-500 text-sm">
+                No bookmarks found matching "{searchQuery}"
+              </div>
+            )}
+          </main>
+
+          {/* Add Bookmark Modal */}
+          {showAddModal && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-base font-bold text-white">Add Bookmark</h2>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddBookmark} className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Title</label>
+                    <input
+                      type="text"
+                      required
+                      autoFocus
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      placeholder="e.g. Linear, GitHub..."
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">URL</label>
+                    <input
+                      type="text"
+                      required
+                      value={newUrl}
+                      onChange={(e) => setNewUrl(e.target.value)}
+                      placeholder="e.g. linear.app"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Category</label>
+                    <select
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm outline-none focus:border-indigo-500"
+                    >
+                      <option value="Dev">Dev</option>
+                      <option value="Social">Social</option>
+                      <option value="Tools">Tools</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddModal(false)}
+                      className="px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
+                    >
+                      Save Bookmark
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="text-center text-xs text-slate-600 font-mono mt-auto pt-6">
+            <span>{bookmarks.length} Bookmarks active</span>
+          </footer>
+        </div>
+      )
+    }
+
+    createRoot(document.getElementById('root')).render(<LinksApp />)
+  </script>
 </body>
 </html>

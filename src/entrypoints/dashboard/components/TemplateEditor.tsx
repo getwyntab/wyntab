@@ -132,41 +132,42 @@ export function TemplateEditor({
     <div className="h-screen w-screen bg-bg-b1 text-text-primary flex flex-col font-sans overflow-hidden select-none">
       {/* Unified 56px Top Header Bar */}
       <header className="h-14 px-4 border-b border-divider-dim bg-bg-b1 flex items-center justify-between shrink-0 z-20">
-        {/* Left: Back to Library */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Left Zone: Back button + Divider + Editable Title + Badge + Unsaved */}
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <button
             type="button"
             onClick={onBack}
-            className="h-8 px-2.5 rounded-md bg-bg-a2 hover:bg-bg-a4 border border-divider-dim hover:border-divider-bright text-text-primary text-[12px] font-medium flex items-center gap-1.5 transition-colors"
+            className="h-8 px-2.5 rounded-md bg-bg-a2 hover:bg-bg-a4 border border-divider-dim hover:border-divider-bright text-text-primary text-[12px] font-medium flex items-center gap-1.5 transition-colors shrink-0"
             title="Return to Library"
           >
             <ArrowLeft size={14} />
             <span>Library</span>
           </button>
-        </div>
 
-        {/* Center: Title input + Custom badge + Unsaved indicator */}
-        <div className="flex items-center gap-2 max-w-md w-full justify-center">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="bg-bg-a2/80 hover:bg-bg-a2 focus:bg-bg-a2 border border-divider-dim focus:border-accent-main rounded-md px-2.5 py-1 text-[13px] font-semibold text-text-primary outline-none transition-colors text-center truncate max-w-xs"
-            placeholder="Template Name"
-            title="Click to rename template"
-          />
-          <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-bg-accent-dark text-accent-bright border border-accent-dim/40 shrink-0">
-            Custom
-          </span>
-          {isDirty && (
-            <span className="flex items-center gap-1 text-[11px] font-medium text-accent-bright shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-bright animate-pulse" />
-              <span>Unsaved</span>
+          <span className="text-divider-bright select-none shrink-0">/</span>
+
+          <div className="flex items-center gap-2 min-w-0">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="bg-transparent hover:bg-bg-a2 focus:bg-bg-a2 border border-transparent hover:border-divider-dim focus:border-accent-main rounded-md px-2.5 py-1 text-[13px] font-semibold text-text-primary outline-none transition-all text-left truncate w-56 focus:w-72"
+              placeholder="Template Name"
+              title="Click to rename template"
+            />
+            <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-bg-accent-dark text-accent-bright border border-accent-dim/40 shrink-0 select-none">
+              Custom
             </span>
-          )}
+            {isDirty && (
+              <span className="flex items-center gap-1 text-[11px] font-medium text-accent-bright shrink-0 select-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-bright animate-pulse" />
+                <span>Unsaved</span>
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Right: Actions (Discard, Save) */}
+        {/* Right Zone: Actions (Discard, Save) */}
         <div className="flex items-center gap-2 shrink-0">
           {isDirty && (
             <button

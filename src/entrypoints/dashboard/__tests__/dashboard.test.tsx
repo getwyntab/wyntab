@@ -62,7 +62,7 @@ describe('Dashboard entrypoint', () => {
       expect(screen.getByText(/extension specifications/i)).toBeInTheDocument()
     })
 
-    expect(screen.getByText(/sandboxed execution model/i)).toBeInTheDocument()
+    expect(screen.getByText(/security & sandbox policy/i)).toBeInTheDocument()
   })
 
   it('sanitizes malicious script and iframe tags when importing backup JSON in Settings', async () => {

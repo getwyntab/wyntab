@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Download, FileUp, Database, ShieldCheck } from 'lucide-react'
+import { Download, FileUp, Database } from 'lucide-react'
 
 interface SettingsPageProps {
   customCount: number
@@ -89,18 +89,6 @@ export function SettingsPage({
             <span className="text-text-muted">Storage Capacity</span>
             <span className="font-mono text-success-main font-semibold">Unlimited (unlimitedStorage permission)</span>
           </div>
-        </div>
-      </section>
-
-      {/* Section 3: Sandboxed Security Note */}
-      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 flex items-start gap-3">
-        <ShieldCheck size={18} className="text-accent-bright shrink-0 mt-0.5" />
-        <div className="text-[12px] space-y-1">
-          <h4 className="font-semibold text-text-primary">Security & Sandbox Policy</h4>
-          <p className="text-text-muted leading-relaxed">
-            All user-authored HTML templates execute inside an isolated browser iframe with strict Content Security Policy.
-            External scripts, plugins, and arbitrary network script injection are blocked to guarantee complete browser privacy and security.
-          </p>
         </div>
       </section>
     </div>

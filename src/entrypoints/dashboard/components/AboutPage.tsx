@@ -1,4 +1,4 @@
-import { Shield, ExternalLink, Cpu } from 'lucide-react'
+import { ShieldCheck, ExternalLink, Cpu } from 'lucide-react'
 
 interface AboutPageProps {
   version?: string
@@ -53,14 +53,13 @@ export function AboutPage({ version = '0.5.0' }: AboutPageProps) {
         </div>
       </section>
 
-      {/* Security Architecture Callout */}
-      <section className="border-l-3 border-accent-main bg-bg-a2/40 border-y border-r border-divider-dim rounded-r-md p-5 flex items-start gap-3">
-        <Shield size={18} className="text-accent-bright shrink-0 mt-0.5" />
+      {/* Security & Sandbox Policy */}
+      <section className="bg-bg-a2/40 border border-divider-dim rounded-md p-5 flex items-start gap-3">
+        <ShieldCheck size={18} className="text-accent-bright shrink-0 mt-0.5" />
         <div className="text-[12px] space-y-1">
-          <h4 className="font-semibold text-text-primary">Sandboxed Execution Model</h4>
+          <h4 className="font-semibold text-text-primary">Security & Sandbox Policy</h4>
           <p className="text-text-muted leading-relaxed">
-            All user-uploaded HTML and edited templates execute within sandboxed frames (<code className="text-accent-bright font-mono text-[11px]">allow-scripts allow-forms allow-same-origin</code>)
-            isolated from the extension's privileged APIs. External JavaScript and unauthorized iframe embeds are stripped by DOM sanitization upon save.
+            All user-authored and uploaded HTML templates execute inside an isolated browser iframe with strict Content Security Policy, completely isolated from extension privileged APIs. External scripts, unauthorized embeds, and arbitrary network script injection are stripped by DOM sanitization upon save to guarantee complete browser privacy and security.
           </p>
         </div>
       </section>

@@ -63,15 +63,13 @@ WYNTab replaces default new tab clutter with an isolated sandbox environment whe
 
 ## Built-in Templates
 
-WYNTab includes five production-ready presets ready to activate, customize, or fork:
-
-| Preview | Preset | Description | Stack |
-| :---: | :--- | :--- | :--- |
-| <img src=".github/assets/template-atmosphere.png" width="220" alt="Atmosphere"> | **Atmosphere** | Ambient gradient with smooth dynamic clock and greeting. | HTML5, Canvas, CSS |
-| <img src=".github/assets/template-terminal.png" width="220" alt="Terminal"> | **Terminal** | Retro hacker CRT shell with live system stats and monospace prompt. | Vanilla JS, Monospace |
-| <img src=".github/assets/template-links.png" width="220" alt="Links"> | **Links** | Productivity speed dial with custom bookmarks and search bar. | React 19, Lucide Icons |
-| <img src=".github/assets/template-minimal.png" width="220" alt="Minimal"> | **Minimal** | Distraction-free, typography-focused layout for deep work. | Semantic HTML, CSS Grid |
-| <img src=".github/assets/template-time.png" width="220" alt="Time"> | **Time** | Oversized minimalist typography clock with high-contrast numerals. | SVG, Pure CSS |
+| Name | Preview |
+| :--- | :---: |
+| **Atmosphere** | <img src=".github/assets/template-atmosphere.png" width="360" alt="Atmosphere"> |
+| **Terminal** | <img src=".github/assets/template-terminal.png" width="360" alt="Terminal"> |
+| **Links** | <img src=".github/assets/template-links.png" width="360" alt="Links"> |
+| **Minimal** | <img src=".github/assets/template-minimal.png" width="360" alt="Minimal"> |
+| **Time** | <img src=".github/assets/template-time.png" width="360" alt="Time"> |
 
 ## Creating Custom Templates
 

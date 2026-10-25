@@ -12,7 +12,7 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "icons": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate_brand_icons.ps1",
-    "assets:cws": "node scripts/build-cws-assets.mjs",
+    "assets:cws": "node scripts/build-cws-assets.mjs && node scripts/generate-store-icon.mjs",
     "compile": "tsc --noEmit",
     "design:lint": "npx -p @google/design.md designmd lint .agents/DESIGN.md",
     "test": "vitest run",

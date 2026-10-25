@@ -36,10 +36,6 @@ Default browser new tab pages are often cluttered with sponsored tiles, algorith
 
 WYNTab replaces default new tab clutter with an isolated sandbox environment where your own code runs instantly. Build dashboards, clocks, note-taking pads, or full web apps directly in the browser with an integrated CodeMirror editor, or upload static HTML bundles with zero external build configuration.
 
-<p align="center">
-  <img src=".github/assets/dashboard.png" alt="WYNTab Dashboard Workstation" width="100%">
-</p>
-
 ## Installation
 
 ### Web Stores
@@ -65,26 +61,17 @@ WYNTab replaces default new tab clutter with an isolated sandbox environment whe
 * **Local & Private:** No analytics, external tracking, or account requirements. All data stays in your browser's local storage.
 * **Zero-Latency Startup:** Background pre-render pipeline prevents blank or white flashes on new tab initialization.
 
-<p align="center">
-  <img src=".github/assets/editor.png" alt="In-Browser CodeMirror Editor with Split Live Preview" width="100%">
-</p>
-
 ## Built-in Templates
 
-WYNTab includes five production-ready presets ready to activate or fork:
+WYNTab includes five production-ready presets ready to activate, customize, or fork:
 
-| Atmosphere | Terminal | Links |
-| :---: | :---: | :---: |
-| <img src=".github/assets/template-atmosphere.png" alt="Atmosphere Preset" width="100%"> | <img src=".github/assets/template-terminal.png" alt="Terminal Preset" width="100%"> | <img src=".github/assets/template-links.png" alt="Links Preset" width="100%"> |
-| Ambient Dynamic Gradient | Retro Hacker CRT Shell | Productivity Speed Dial |
-
-| Template | Description | Stack |
-| :--- | :--- | :--- |
-| **Atmosphere** | Ambient gradient background with dynamic clock and greeting. | HTML5, Canvas, CSS |
-| **Terminal** | Retro hacker CRT shell with live system stats, uptime, and monospace prompt. | Vanilla JS, Monospace |
-| **Links** | Productivity speed dial with customizable bookmarks and search bar. | React 19, Lucide Icons |
-| **Minimal** | Distraction-free, typography-focused layout designed for deep work. | Semantic HTML, CSS Grid |
-| **Time** | Oversized minimalist typography clock with high-contrast numerals. | SVG, Pure CSS |
+| Preview | Preset | Description | Stack |
+| :---: | :--- | :--- | :--- |
+| <img src=".github/assets/template-atmosphere.png" width="220" alt="Atmosphere"> | **Atmosphere** | Ambient gradient with smooth dynamic clock and greeting. | HTML5, Canvas, CSS |
+| <img src=".github/assets/template-terminal.png" width="220" alt="Terminal"> | **Terminal** | Retro hacker CRT shell with live system stats and monospace prompt. | Vanilla JS, Monospace |
+| <img src=".github/assets/template-links.png" width="220" alt="Links"> | **Links** | Productivity speed dial with custom bookmarks and search bar. | React 19, Lucide Icons |
+| <img src=".github/assets/template-minimal.png" width="220" alt="Minimal"> | **Minimal** | Distraction-free, typography-focused layout for deep work. | Semantic HTML, CSS Grid |
+| <img src=".github/assets/template-time.png" width="220" alt="Time"> | **Time** | Oversized minimalist typography clock with high-contrast numerals. | SVG, Pure CSS |
 
 ## Creating Custom Templates
 
@@ -212,6 +199,18 @@ Technical architecture guidelines are documented in [.agents/AGENTS.md](.agents/
 
 ## License
 
-Copyright (c) 2026 WYNTab Authors.
+```text
+Copyright (c) 2026 WYNTab Authors
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```

@@ -21,8 +21,13 @@ async function main() {
   const page = await browser.newPage();
   await page.setViewport({ width: 128, height: 128, deviceScaleFactor: 1 });
 
-  // Chrome Web Store Store Icon: 128x128 Canvas, 96x96 artwork, 16px transparent padding
-  const iconHtml = `
+  // 100% Google CWS Compliant:
+  // - 128x128 Total Canvas (PNG with transparency)
+  // - 96x96 Artwork Size in center
+  // - Exactly 16px transparent padding on all 4 sides (16 + 96 + 16 = 128)
+  // - ZERO drop shadow (prevents dirty alpha halo and conflicts with CWS automatic shadow)
+  // - Crisp 1px #373737 structural border and #161616 dark surface
+  const storeIconHtml = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -41,10 +46,9 @@ async function main() {
         .icon-tile {
           width: 96px;
           height: 96px;
-          border-radius: 22px;
-          background: #1C1D21;
-          border: 1px solid #383B44;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+          border-radius: 18px;
+          background: #161616;
+          border: 1px solid #373737;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -64,17 +68,17 @@ async function main() {
     </html>
   `;
 
-  await page.setContent(iconHtml);
-  await new Promise(r => setTimeout(r, 300));
+  await page.setContent(storeIconHtml);
+  await new Promise(r => setTimeout(r, 200));
   
   const destPath = path.join(outDir, 'store-icon-128x128.png');
   await page.screenshot({
     path: destPath,
     type: 'png',
-    omitBackground: true // ensures 16px padding remains transparent per CWS guidelines
+    omitBackground: true
   });
 
-  console.log('Generated store icon:', destPath);
+  console.log('Generated strictly compliant store-icon-128x128.png');
   await browser.close();
 }
 

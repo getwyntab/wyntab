@@ -14,34 +14,17 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square" alt="License"></a>
 </p>
 
-<p align="center">
-  <a href="#overview">Overview</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#features">Features</a> •
-  <a href="#built-in-templates">Built-in Templates</a> •
-  <a href="#creating-custom-templates">Create with AI</a> •
-  <a href="#template-api">Template API</a> •
-  <a href="#development">Development</a> •
-  <a href="#architecture--security">Architecture</a> •
-  <a href="#contributing">Contributing</a>
-</p>
-
----
-
 ## Overview
-
-Default browser new tab pages are often cluttered with sponsored tiles, algorithmic feeds, and trackers.
 
 WYNTab replaces default new tab clutter with an isolated sandbox environment where your own code runs instantly. Build dashboards, clocks, note-taking pads, or full web apps directly in the browser with an integrated CodeMirror editor, or upload static HTML bundles with zero external build configuration.
 
 ## Installation
 
-### Web Stores
+### Chrome Web Store
 
-* **Chrome Web Store:** [Install WYNTab](https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff) *(Compatible with Chrome, Brave, Edge, Opera, and Vivaldi)*
-* **Firefox Add-ons:** Coming soon
+Install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff) *(compatible with Chrome, Brave, Edge, Opera, and Vivaldi)*.
 
-### Manual Install (Development Builds)
+### Manual Install
 
 1. Download `wyntab-*-chrome.zip` from the [Latest Release](https://github.com/getwyntab/wyntab/releases/latest).
 2. Unzip the downloaded file.
@@ -144,9 +127,6 @@ npm install
 
 # Start development runner (Chrome MV3)
 npm run dev
-
-# Start development runner (Firefox MV2)
-npm run dev:firefox
 ```
 
 ### Testing and Validation
@@ -165,33 +145,20 @@ npm run design:lint
 ### Building Packages
 
 ```bash
-# Build production zip packages
-npm run zip          # Output: .output/wyntab-*-chrome.zip
-npm run zip:firefox  # Output: .output/wyntab-*-firefox.zip
-
-# Build store and social assets
-npm run assets:cws   # Output: .output/cws-assets/
-npm run assets:yt    # Output: .output/yt-assets/
+# Build production extension package
+npm run zip    # Output: .output/wyntab-*-chrome.zip
 ```
 
 ## Architecture & Security
 
-WYNTab is architected to ensure user-generated templates cannot access privileged browser APIs:
-
-* **No Remote Execution in Extension Context:** The extension's extension pages (`dashboard.html`, `newtab.html`, `background.js`) contain only local, statically packaged code.
-* **Sandboxed Iframe Runtime:** User templates run exclusively within an unprivileged `sandbox.html` iframe with `sandbox="allow-scripts allow-forms allow-popups allow-modals"`.
-* **CSP Isolation:** The sandbox iframe has no access to privileged `chrome.*` extension APIs (such as `chrome.cookies`, `chrome.tabs`, or `chrome.webRequest`).
-* **Input Sanitization:** Uploaded HTML files and imported JSON backups are processed through a DOMParser-based sanitization pipeline before storage.
+* **Sandboxed Execution:** Templates run exclusively inside an unprivileged `sandbox.html` iframe with `sandbox="allow-scripts allow-forms allow-popups allow-modals"`.
+* **API Isolation:** Sandbox iframe has zero access to privileged `chrome.*` extension APIs (`chrome.cookies`, `chrome.tabs`, `chrome.webRequest`).
+* **Local Sanitization:** Uploaded templates pass through a strict DOMParser sanitization engine before saving to local storage. Zero telemetry or external network calls.
 
 ## Contributing
 
-Contributions, bug reports, and feature requests are welcome.
-
-1. Check the [Issues](https://github.com/getwyntab/wyntab/issues) tab to see if your proposal is already being discussed.
-2. For major changes, please open an issue first to outline what you would like to change.
-3. Ensure all tests and lint checks pass before submitting a pull request (`npm test && npm run compile`).
-
-Technical architecture guidelines are documented in [.agents/AGENTS.md](.agents/AGENTS.md).
+Contributions, bug reports, and feature requests are welcome via [Issues](https://github.com/getwyntab/wyntab/issues).
+Architecture and engineering standards are documented in [.agents/AGENTS.md](.agents/AGENTS.md).
 
 ## License
 

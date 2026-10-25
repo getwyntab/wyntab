@@ -10,9 +10,9 @@
 
 <p align="center">
   <a href="https://github.com/getwyntab/wyntab/releases/latest"><img src="https://img.shields.io/github/v/release/getwyntab/wyntab?style=flat-square&color=10B981" alt="Latest Release"></a>
-  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/badge/Chrome_Web_Store-v0.6.0-10B981?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store"></a>
-  <a href="https://github.com/getwyntab/wyntab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/getwyntab/wyntab/ci.yml?style=flat-square&label=CI" alt="CI Status"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square" alt="License"></a>
+  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/users/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&color=10B981&logo=googlechrome&logoColor=white" alt="Chrome Web Store Users"></a>
+  <a href="https://github.com/getwyntab/wyntab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/getwyntab/wyntab/ci.yml?style=flat-square&label=tests&logo=githubactions&logoColor=white" alt="Test Status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg?style=flat-square" alt="License"></a>
 </p>
 
 <p align="center">
@@ -20,19 +20,25 @@
   <a href="#installation">Installation</a> •
   <a href="#features">Features</a> •
   <a href="#built-in-templates">Built-in Templates</a> •
+  <a href="#creating-custom-templates-with-ai">Create with AI</a> •
   <a href="#template-api">Template API</a> •
   <a href="#development">Development</a> •
-  <a href="#architecture--security">Architecture</a> •
-  <a href="#contributing">Contributing</a>
+  <a href="#architecture--security">Architecture</a>
+</p>
+
+---
+
+<p align="center">
+  <img src="docs/assets/dashboard.png" alt="WYNTab Workstation Dashboard" width="100%">
 </p>
 
 ---
 
 ## Overview
 
-Default browser new tab pages are often cluttered with sponsored tiles, algorithmic feeds, and trackers.
+Default browser new tab pages are often cluttered with sponsored tiles, algorithmic clickbait feeds, and trackers.
 
-WYNTab replaces this with an isolated sandbox environment where your own code runs instantly. Build dashboards, clocks, note-taking pads, or full web apps directly in the browser with an integrated CodeMirror editor, or upload static HTML bundles with zero external build configuration.
+WYNTab replaces default new tabs with an isolated sandbox environment where your own code runs instantly. Build dashboards, minimal clocks, note-taking pads, or full interactive web applications directly in the browser with an integrated CodeMirror 6 editor, or upload static HTML bundles with zero external build tooling.
 
 ## Installation
 
@@ -59,9 +65,17 @@ WYNTab replaces this with an isolated sandbox environment where your own code ru
 * **Local & Private:** No analytics, external tracking, or account requirements. All data stays in your browser's local storage.
 * **Zero-Latency Startup:** Background pre-render pipeline prevents blank or white flashes on new tab initialization.
 
+---
+
+<p align="center">
+  <img src="docs/assets/editor.png" alt="In-Dashboard CodeMirror Editor" width="100%">
+</p>
+
+---
+
 ## Built-in Templates
 
-WYNTab includes five production-ready presets:
+WYNTab includes five production-ready presets ready to activate or fork:
 
 | Template | Description | Stack |
 | :--- | :--- | :--- |
@@ -71,19 +85,58 @@ WYNTab includes five production-ready presets:
 | **Minimal** | Distraction-free, typography-focused layout designed for deep work. | Semantic HTML, CSS Grid |
 | **Time** | Oversized minimalist typography clock with high-contrast numerals. | SVG, Pure CSS |
 
+<p align="center">
+  <img src="docs/assets/atmosphere.png" width="49%" alt="Atmosphere Preset">
+  <img src="docs/assets/terminal.png" width="49%" alt="Terminal Preset">
+</p>
+
+## Creating Custom Templates with AI
+
+You can generate complete, functional new tab dashboards in seconds using any LLM (ChatGPT, Claude, Gemini, DeepSeek).
+
+### Prompt Template
+
+Copy and paste this prompt into your AI assistant:
+
+```text
+Write a complete, single-file HTML new tab page for the WYNTab browser extension.
+
+Requirements:
+1. Load Tailwind CSS via: <script src="https://cdn.tailwindcss.com"></script>
+2. Layout: Fullscreen (100vw x 100vh), overflow hidden, dark utilitarian theme (bg-[#121316]).
+3. Features:
+   - Live real-time clock and current date.
+   - Quick search input bar that forwards queries to Google or DuckDuckGo.
+   - Clean speed-dial grid of bookmarks with icons.
+   - Scoped notepad / todo list that persists across browser restarts.
+4. Persistent Storage:
+   - Use `await window.wyntab.set(key, value)` to save data.
+   - Use `await window.wyntab.get(key)` on page load to restore saved state.
+5. Return ONLY the raw HTML code inside a single <!DOCTYPE html> block. Do not use external Node/npm dependencies.
+```
+
+### How to Install Your New Template
+
+1. Open WYNTab Dashboard (`chrome-extension://...` or click the extension toolbar icon).
+2. Click **+** (*Create blank template*) on the top toolbar.
+3. Paste the generated HTML into the CodeMirror editor. Inspect the live preview in the right pane.
+4. Click **Save Changes**, then toggle **Activate**.
+
+---
+
 ## Template API
 
 Templates running in WYNTab have access to a scoped storage bridge exposed on `window.wyntab`:
 
 ```javascript
-// Store a value for the active template
-await window.wyntab.set('notes', 'Review pull requests before release');
+// Store a value scoped to the active template
+await window.wyntab.set('todos', ['Ship v0.6.0', 'Review PRs']);
 
 // Retrieve a stored value
-const notes = await window.wyntab.get('notes');
+const todos = await window.wyntab.get('todos');
 
 // Delete a stored key
-await window.wyntab.remove('notes');
+await window.wyntab.remove('todos');
 ```
 
 ### External Libraries
@@ -150,7 +203,7 @@ npm run assets:yt    # Output: .output/yt-assets/
 
 WYNTab is architected to ensure user-generated templates cannot access privileged browser APIs:
 
-* **No Remote Execution in Extension Context:** The extension's extension pages (`dashboard.html`, `newtab.html`, `background.js`) contain only local, statically packaged code.
+* **No Remote Execution in Extension Context:** The extension pages (`dashboard.html`, `newtab.html`, `background.js`) contain only local, statically packaged code.
 * **Sandboxed Iframe Runtime:** User templates run exclusively within an unprivileged `sandbox.html` iframe with `sandbox="allow-scripts allow-forms allow-popups allow-modals"`.
 * **CSP Isolation:** The sandbox iframe has no access to privileged `chrome.*` extension APIs (such as `chrome.cookies`, `chrome.tabs`, or `chrome.webRequest`).
 * **Input Sanitization:** Uploaded HTML files and imported JSON backups are processed through a DOMParser-based sanitization pipeline before storage.

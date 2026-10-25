@@ -9,10 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/getwyntab/wyntab/releases/latest"><img src="https://img.shields.io/github/v/release/getwyntab/wyntab?style=flat-square&color=10B981" alt="Latest Release"></a>
-  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/users/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&color=10B981&logo=googlechrome&logoColor=white" alt="Chrome Web Store Users"></a>
-  <a href="https://github.com/getwyntab/wyntab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/getwyntab/wyntab/ci.yml?style=flat-square&label=tests&logo=githubactions&logoColor=white" alt="Test Status"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg?style=flat-square" alt="License"></a>
+  <a href="https://github.com/getwyntab/wyntab/releases/latest"><img src="https://img.shields.io/github/v/release/getwyntab/wyntab?style=flat-square&color=10B981&label=Release" alt="Latest Release"></a>
+  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/users/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&label=Users&logo=googlechrome&logoColor=white&color=10B981" alt="Chrome Web Store Users"></a>
+  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/rating/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&label=Rating&color=10B981" alt="Chrome Web Store Rating"></a>
+  <a href="https://github.com/getwyntab/wyntab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/getwyntab/wyntab/ci.yml?branch=main&style=flat-square&label=Build" alt="Build Status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square" alt="License"></a>
 </p>
 
 <p align="center">
@@ -20,25 +21,24 @@
   <a href="#installation">Installation</a> •
   <a href="#features">Features</a> •
   <a href="#built-in-templates">Built-in Templates</a> •
-  <a href="#creating-custom-templates-with-ai">Create with AI</a> •
+  <a href="#creating-custom-templates">Create with AI</a> •
   <a href="#template-api">Template API</a> •
   <a href="#development">Development</a> •
-  <a href="#architecture--security">Architecture</a>
-</p>
-
----
-
-<p align="center">
-  <img src="docs/assets/dashboard.png" alt="WYNTab Workstation Dashboard" width="100%">
+  <a href="#architecture--security">Architecture</a> •
+  <a href="#contributing">Contributing</a>
 </p>
 
 ---
 
 ## Overview
 
-Default browser new tab pages are often cluttered with sponsored tiles, algorithmic clickbait feeds, and trackers.
+Default browser new tab pages are often cluttered with sponsored tiles, algorithmic feeds, and trackers.
 
-WYNTab replaces default new tabs with an isolated sandbox environment where your own code runs instantly. Build dashboards, minimal clocks, note-taking pads, or full interactive web applications directly in the browser with an integrated CodeMirror 6 editor, or upload static HTML bundles with zero external build tooling.
+WYNTab replaces default new tab clutter with an isolated sandbox environment where your own code runs instantly. Build dashboards, clocks, note-taking pads, or full web apps directly in the browser with an integrated CodeMirror editor, or upload static HTML bundles with zero external build configuration.
+
+<p align="center">
+  <img src=".github/assets/dashboard.png" alt="WYNTab Dashboard Workstation" width="100%">
+</p>
 
 ## Installation
 
@@ -65,17 +65,18 @@ WYNTab replaces default new tabs with an isolated sandbox environment where your
 * **Local & Private:** No analytics, external tracking, or account requirements. All data stays in your browser's local storage.
 * **Zero-Latency Startup:** Background pre-render pipeline prevents blank or white flashes on new tab initialization.
 
----
-
 <p align="center">
-  <img src="docs/assets/editor.png" alt="In-Dashboard CodeMirror Editor" width="100%">
+  <img src=".github/assets/editor.png" alt="In-Browser CodeMirror Editor with Split Live Preview" width="100%">
 </p>
-
----
 
 ## Built-in Templates
 
 WYNTab includes five production-ready presets ready to activate or fork:
+
+| Atmosphere | Terminal | Links |
+| :---: | :---: | :---: |
+| <img src=".github/assets/template-atmosphere.png" alt="Atmosphere Preset" width="100%"> | <img src=".github/assets/template-terminal.png" alt="Terminal Preset" width="100%"> | <img src=".github/assets/template-links.png" alt="Links Preset" width="100%"> |
+| Ambient Dynamic Gradient | Retro Hacker CRT Shell | Productivity Speed Dial |
 
 | Template | Description | Stack |
 | :--- | :--- | :--- |
@@ -85,61 +86,52 @@ WYNTab includes five production-ready presets ready to activate or fork:
 | **Minimal** | Distraction-free, typography-focused layout designed for deep work. | Semantic HTML, CSS Grid |
 | **Time** | Oversized minimalist typography clock with high-contrast numerals. | SVG, Pure CSS |
 
-<p align="center">
-  <img src="docs/assets/atmosphere.png" width="49%" alt="Atmosphere Preset">
-  <img src="docs/assets/terminal.png" width="49%" alt="Terminal Preset">
-</p>
+## Creating Custom Templates
 
-## Creating Custom Templates with AI
+You can build templates manually in the WYNTab editor, upload single `.html` files, or generate complete custom new tab pages using AI models (ChatGPT, Claude, Gemini).
 
-You can generate complete, functional new tab dashboards in seconds using any LLM (ChatGPT, Claude, Gemini, DeepSeek).
+### Generating Templates with AI
 
-### Prompt Template
-
-Copy and paste this prompt into your AI assistant:
+Copy and paste the following prompt into your preferred AI model along with your desired features:
 
 ```text
-Write a complete, single-file HTML new tab page for the WYNTab browser extension.
+Create a single-file HTML new tab page for the WYNTab browser extension.
 
-Requirements:
-1. Load Tailwind CSS via: <script src="https://cdn.tailwindcss.com"></script>
-2. Layout: Fullscreen (100vw x 100vh), overflow hidden, dark utilitarian theme (bg-[#121316]).
-3. Features:
-   - Live real-time clock and current date.
-   - Quick search input bar that forwards queries to Google or DuckDuckGo.
-   - Clean speed-dial grid of bookmarks with icons.
-   - Scoped notepad / todo list that persists across browser restarts.
-4. Persistent Storage:
-   - Use `await window.wyntab.set(key, value)` to save data.
-   - Use `await window.wyntab.get(key)` on page load to restore saved state.
-5. Return ONLY the raw HTML code inside a single <!DOCTYPE html> block. Do not use external Node/npm dependencies.
+Technical Specifications:
+1. Deliver a single, complete, self-contained HTML file (all CSS in <style> and all JS in <script> or <script type="module">).
+2. Layout must fill the full viewport (100vw by 100vh) with zero margin and zero scrollbar overflow:
+   html, body { width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; }
+3. Theme: Utilitarian dark-mode first (#121212 / #1E1E1E surfaces with high-contrast readable typography).
+4. Styling: You may include Tailwind CSS directly via:
+   <script src="https://cdn.tailwindcss.com"></script>
+5. Libraries: You may import external ES modules directly from https://esm.sh/ (e.g. canvas-confetti, lucide, chart.js).
+6. Data Persistence: For any user data (notes, bookmarks, settings, todos), use WYNTab's asynchronous storage bridge instead of localStorage:
+   - Save: await window.wyntab.set('key', value)
+   - Read: const val = await window.wyntab.get('key')
+   - Delete: await window.wyntab.remove('key')
+
+Feature Requirements:
+[Describe your desired new tab experience here — e.g., "A minimalist Pomodoro timer with daily top-3 task checklist and keyboard shortcuts."]
 ```
 
-### How to Install Your New Template
-
-1. Open WYNTab Dashboard (`chrome-extension://...` or click the extension toolbar icon).
-2. Click **+** (*Create blank template*) on the top toolbar.
-3. Paste the generated HTML into the CodeMirror editor. Inspect the live preview in the right pane.
-4. Click **Save Changes**, then toggle **Activate**.
-
----
+Once generated, click **New Template** (`+`) in the WYNTab Dashboard, paste the code, and click **Save Changes**.
 
 ## Template API
 
-Templates running in WYNTab have access to a scoped storage bridge exposed on `window.wyntab`:
+Templates running in WYNTab communicate with extension storage through a scoped bridge on `window.wyntab`:
 
 ```javascript
-// Store a value scoped to the active template
-await window.wyntab.set('todos', ['Ship v0.6.0', 'Review PRs']);
+// Store a value scoped to the current template
+await window.wyntab.set('notes', 'Review pull requests before release');
 
 // Retrieve a stored value
-const todos = await window.wyntab.get('todos');
+const notes = await window.wyntab.get('notes');
 
 // Delete a stored key
-await window.wyntab.remove('todos');
+await window.wyntab.remove('notes');
 ```
 
-### External Libraries
+### Loading External Modules
 
 Templates can import ES modules from trusted CDNs directly:
 
@@ -203,7 +195,7 @@ npm run assets:yt    # Output: .output/yt-assets/
 
 WYNTab is architected to ensure user-generated templates cannot access privileged browser APIs:
 
-* **No Remote Execution in Extension Context:** The extension pages (`dashboard.html`, `newtab.html`, `background.js`) contain only local, statically packaged code.
+* **No Remote Execution in Extension Context:** The extension's extension pages (`dashboard.html`, `newtab.html`, `background.js`) contain only local, statically packaged code.
 * **Sandboxed Iframe Runtime:** User templates run exclusively within an unprivileged `sandbox.html` iframe with `sandbox="allow-scripts allow-forms allow-popups allow-modals"`.
 * **CSP Isolation:** The sandbox iframe has no access to privileged `chrome.*` extension APIs (such as `chrome.cookies`, `chrome.tabs`, or `chrome.webRequest`).
 * **Input Sanitization:** Uploaded HTML files and imported JSON backups are processed through a DOMParser-based sanitization pipeline before storage.

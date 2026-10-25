@@ -3,9 +3,9 @@ version: "alpha"
 name: WYNTab
 description: "Utilitarian design system for WYNTab browser extension full-tab dashboard and newtab surfaces"
 colors:
-  primary: "#D37918"
-  primary-hover: "#FC9729"
-  on-primary: "#161616"
+  primary: "#10B981"
+  primary-hover: "#34D399"
+  on-primary: "#022C22"
   secondary: "#969696"
   on-secondary: "#161616"
   surface: "#222222"
@@ -94,12 +94,12 @@ components:
 ## Overview
 
 WYNTab is a distraction-free, functional utility extension for replacing the browser New Tab page with custom HTML.
-The UI adheres to Linear/Raycast/Violentmonkey utilitarian minimalism: high-contrast dark-first design, amber accents (#D37918), 1px solid structural dividers, and zero AI visual slop.
+The UI adheres to Linear/Raycast/Violentmonkey utilitarian minimalism: high-contrast dark-first design, emerald accents (#10B981), 1px solid structural dividers, and zero AI visual slop.
 
 ## Colors
 
-The palette emphasizes dark-first high-contrast fundamentals with an amber accent:
-- **Primary (#D37918)**: Utilitarian amber accent for active badges, toggles, and primary CTAs. Text on primary is #161616 bold.
+The palette emphasizes dark-first high-contrast fundamentals with an emerald accent:
+- **Primary (#10B981)**: Utilitarian emerald accent for active badges, toggles, and primary CTAs. Text on primary is #022C22 bold.
 - **Secondary (#969696)**: Muted gray for auxiliary labels, status markers, and secondary borders.
 - **Surface (#222222)**: Dark card surface and modal container backdrop in dark theme.
 - **Surface Muted (#1F1F1F)**: Secondary action surface and recessed wells.

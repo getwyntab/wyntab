@@ -29,13 +29,13 @@ function New-BrandIcon {
     # Draw resized image
     $g.DrawImage($srcImg, 0, 0, $size, $size)
     
-    # Convert all non-transparent pixels to black
+    # Convert all non-transparent pixels to Terminal Green (#10B981)
     for ($x = 0; $x -lt $newImg.Width; $x++) {
         for ($y = 0; $y -lt $newImg.Height; $y++) {
             $pixel = $newImg.GetPixel($x, $y)
             if ($pixel.A -gt 0) {
-                # Preserve original alpha but force color to black
-                $newColor = [System.Drawing.Color]::FromArgb($pixel.A, 0, 0, 0)
+                # Preserve original alpha but force color to Terminal Green (#10B981 -> R:16, G:185, B:129)
+                $newColor = [System.Drawing.Color]::FromArgb($pixel.A, 16, 185, 129)
                 $newImg.SetPixel($x, $y, $newColor)
             }
         }

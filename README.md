@@ -10,8 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/getwyntab/wyntab/releases/latest"><img src="https://img.shields.io/github/v/release/getwyntab/wyntab?style=flat-square&color=10B981&label=Release" alt="Latest Release"></a>
-  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/users/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&label=Users&logo=googlechrome&logoColor=white&color=10B981" alt="Chrome Web Store Users"></a>
-  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/rating/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&label=Rating&color=10B981" alt="Chrome Web Store Rating"></a>
+  <a href="https://chromewebstore.google.com/detail/wyntab/hbfabaimiglbfjhcppfedgjkpfgabiff"><img src="https://img.shields.io/chrome-web-store/users/hbfabaimiglbfjhcppfedgjkpfgabiff.svg?style=flat-square&label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white&color=10B981" alt="Chrome Web Store"></a>
   <a href="https://github.com/getwyntab/wyntab/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/getwyntab/wyntab/ci.yml?branch=main&style=flat-square&label=Build" alt="Build Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square" alt="License"></a>
 </p>
